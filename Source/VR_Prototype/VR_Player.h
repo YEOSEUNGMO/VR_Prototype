@@ -21,6 +21,10 @@ class VR_PROTOTYPE_API AVR_Player : public APawn
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player", meta = (AllowPrivateAccess = "true"))
 		class UCameraComponent* VRCamera;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player", meta = (AllowPrivateAccess = "true"))
+		class AVR_ItemHolder* RifleHolder;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player", meta = (AllowPrivateAccess = "true"))
+		class UChildActorComponent* RifleHolderComponent;
 public:
 	// Sets default values for this pawn's properties
 	AVR_Player();
@@ -49,12 +53,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player", meta = (AllowPrivateAccess = "true"))
 		class AVR_MotionController* RightController;
-	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RifleHolder", meta = (AllowPrivateAccess = "true"))
-		class AVR_RifleHolder* RifleHolder;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RifleHolder", meta = (AllowPrivateAccess = "true"))
-		class AVR_CrossBowHolder* CrossBowHolder;
+		class AVR_ItemHolder* CrossBowHolder;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player", meta = (AllowPrivateAccess = "true"))
 		float DefaultPlayerHeight;
@@ -72,12 +73,6 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-/*
-	static bool GetOnRifle();
-	static void SetOnRifle(bool);
-
-	static bool GetOnCrossBow();
-	static void SetOnCrossBow(bool);*/
 
 
 };

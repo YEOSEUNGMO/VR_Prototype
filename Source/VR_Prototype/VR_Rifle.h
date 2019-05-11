@@ -100,7 +100,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Rifle")
 		void TriggerReleased();
 	UFUNCTION()
-		void OnComponentBeginOverlap(class UPrimitiveComponent* OverlappedComp, AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+		void OnComponentBeginOverlap(class UPrimitiveComponent* OverlappedComp, AActor* OtherActor, 
+			class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 	UFUNCTION(BlueprintCallable, Category = "Rifle")
 		void SetGripState(ERifleGripState state);
 	UFUNCTION(BlueprintCallable, Category = "Rifle")
@@ -111,6 +112,8 @@ public:
 		void MainGrip_Tick();
 	UFUNCTION(BlueprintCallable, Category = "Rifle")
 		void BothGrip_Tick();
+	UFUNCTION(BlueprintCallable, Category = "Rifle")
+		FTransform InvertTransform(FTransform transform);
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

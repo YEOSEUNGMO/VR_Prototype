@@ -22,7 +22,8 @@ public:
 		bool RifleGraped;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HandAnimation")
 		bool RifleSubGraped;
-//	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HandAnimation")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HandAnimation")
+		ERifleGripState CurrentRifleGripState;
 	//	EWeaponState_Code CurrentWeaponState;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HandAnimation")
 		EGrip_Code CurrentGripState;

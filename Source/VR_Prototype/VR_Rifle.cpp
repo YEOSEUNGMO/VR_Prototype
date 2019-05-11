@@ -63,7 +63,7 @@ AVR_Rifle::AVR_Rifle()
 	MagazineBox = CreateDefaultSubobject<UBoxComponent>("MagazineBox");
 	MagazineBox->SetCollisionProfileName(TEXT("OverlapAllDynamic"));
 	MagazineBox->SetGenerateOverlapEvents(true);
-	MagazineBox->OnComponentBeginOverlap.AddDynamic(this, &AVR_Rifle:OnComponentBeginOverlap);
+	MagazineBox->OnComponentBeginOverlap.AddDynamic(this, &AVR_Rifle::OnComponentBeginOverlap);
 	MagazineBox->SetupAttachment(RifleMesh);
 
 	ProjectileClass = AVR_Projectile::StaticClass();
@@ -583,12 +583,12 @@ void AVR_Rifle::BothGrip_Tick()
 	MainHand->GetHandMesh()->SetRelativeRotation(result);
 }
 
-FTransform InvertTransform(FTransform transform)
+FTransform AVR_Rifle::InvertTransform(FTransform transform)
 {
 	FTransform result;
 
-	result.SetLocation = (FVector(0.0f, 0.0f, 0.0f) - transform.GetLocation());
-	result.SetRotation = (FRotator(0.0f, 0.0f, 0.0f) - transform.GetRotation().Rotator());
+	result.SetLocation((FVector(0.0f, 0.0f, 0.0f) - transform.GetLocation()));
+	result.SetRotation((FQuat(0.0f, 0.0f, 0.0f, 0.0f) - transform.GetRotation()));
 	result.SetScale3D(FVector(1.0f, 1.0f, 1.0f));
 
 	return result;

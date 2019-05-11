@@ -3,8 +3,10 @@
 #include "VR_ItemHolder.h"
 #include "Components/BoxComponent.h"
 #include "VR_MotionController.h"
+#include "Engine/Engine.h"
 #include "Engine/World.h"
 #include "TimerManager.h"
+#include "VR_Rifle.h"
 
 // Sets default values
 AVR_ItemHolder::AVR_ItemHolder()
@@ -28,7 +30,7 @@ AVR_ItemHolder::AVR_ItemHolder()
 void AVR_ItemHolder::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	makeItem();
 }
 
 //// Called every frame
@@ -38,10 +40,10 @@ void AVR_ItemHolder::BeginPlay()
 //
 //}
 
-void AVR_ItemHolder::SetTargetItemClass(UClass * Target)
-{
-	TargetItemClass = Target;
-}
+//void AVR_ItemHolder::SetTargetItemClass(UClass * Target)
+//{
+//	TargetItemClass = Target;
+//}
 
 void AVR_ItemHolder::makeItem()
 {
@@ -51,8 +53,9 @@ void AVR_ItemHolder::makeItem()
 	FActorSpawnParameters parameter;
 	parameter.Owner = this;
 
-	if (TargetItemClass != nullptr)
+	if (TargetItemClass->IsValidLowLevel())
 	{
+		GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Yellow, TargetItemClass->GetName(), true, FVector2D(10.0f, 10.0f));
 		spawnActor = GetWorld()->SpawnActorDeferred<AActor>(TargetItemClass->GetClass(), SpawnTransform, this, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
 		ItemIn_Implementation(spawnActor, nullptr);
 	}

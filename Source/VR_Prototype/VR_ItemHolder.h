@@ -2,6 +2,20 @@
 
 #pragma once
 
+#define PRIVATE_MEMBER(Type,Name)\
+private:\
+	Type m_##Name;\
+public:\
+	inline const Type& Get##Name() const\
+	{\
+		return this->m_##Name;\
+	}\
+	inline void Set##Name(const Type& in##Name)\
+	{\
+		this->m_##Name=in##Name;\
+	}\
+private:\
+
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "IN_ItemOwner.h"
@@ -29,7 +43,7 @@ class VR_PROTOTYPE_API AVR_ItemHolder : public AActor ,public IIN_ItemOwner,publ
 		FTimerHandle RegenTimerHandle;
 	UPROPERTY(VisibleDefaultsOnly, Category = "ItemHolder")
 		float ItemRegenTime;
-
+	PRIVATE_MEMBER(TSubclassOf<UClass>, TargetItemClass)
 public:	
 	// Sets default values for this actor's properties
 	AVR_ItemHolder();
@@ -42,8 +56,6 @@ protected:
 public:	
 	// Called every frame
 	//virtual void Tick(float DeltaTime) override;
-	UFUNCTION(BlueprintCallable, Category = "ItemHoler")
-		void SetTargetItemClass(UClass * target);
 
 	UFUNCTION(BlueprintCallable, Category = "ItemHoler")
 		void makeItem();

@@ -5,11 +5,13 @@
 #include "Components/InputComponent.h"
 #include "Components/SceneComponent.h"
 #include "Components/BoxComponent.h"
+#include "Engine/Engine.h"
 #include "MotionControllerComponent.h"
 #include "HeadMountedDisplayFunctionLibrary.h"
 #include "VR_MotionController.h"
-#include "VR_RifleHolder.h"
-#include "VR_CrossBowHolder.h"
+#include "VR_ItemHolder.h"
+#include "VR_Rifle.h"
+#include "Components/ChildActorComponent.h"
 
 // Sets default values
 AVR_Player::AVR_Player()
@@ -20,12 +22,15 @@ AVR_Player::AVR_Player()
 	RootScene = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
 	CameraBase = CreateDefaultSubobject<USceneComponent>(TEXT("VROrigin"));
 	VRCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
+	RifleHolderComponent = CreateDefaultSubobject<UChildActorComponent>(TEXT("RifleHolderComponent"));
 
 	RootComponent = RootScene;
 	CameraBase->SetupAttachment(RootComponent);
 	VRCamera->SetupAttachment(CameraBase);
-	
-	DefaultPlayerHeight = 180.0f;
+	RifleHolderComponent->SetupAttachment(VRCamera);
+	RifleHolderComponent->SetChildActorClass(AVR_ItemHolder::StaticClass());
+	RifleHolderComponent->SetRelativeLocation(FVector(-50.0f,0.0f,33.0f));
+	DefaultPlayerHeight = 100.0f;
 	bUseControllerRollToRotate = false;
 
 }
@@ -36,22 +41,22 @@ void AVR_Player::BeginPlay()
 	Super::BeginPlay();
 
 	//// Epic Comment :D // Setup Player Height for various Platforms (PS4, Vive, Oculus)
-	//FName DeviceName = UHeadMountedDisplayFunctionLibrary::GetHMDDeviceName();
+	FName DeviceName = UHeadMountedDisplayFunctionLibrary::GetHMDDeviceName();
 
-	//if (DeviceName == "SteamVR" || DeviceName == "OculusHMD")
-	//{
-	//	// Epic Comment :D // Windows (Oculus / Vive)
-	//	UHeadMountedDisplayFunctionLibrary::SetTrackingOrigin(EHMDTrackingOrigin::Floor);
-	//}
-	//else
-	//{
-	//	// Epic Comment :D // PS4
-	//	UHeadMountedDisplayFunctionLibrary::SetTrackingOrigin(EHMDTrackingOrigin::Eye);
-	//	CameraBase->AddLocalOffset(FVector(0.0f, 0.0f, DefaultPlayerHeight));
+	if (DeviceName == "SteamVR" || DeviceName == "OculusHMD")
+	{
+		// Epic Comment :D // Windows (Oculus / Vive)
+		UHeadMountedDisplayFunctionLibrary::SetTrackingOrigin(EHMDTrackingOrigin::Floor);
+	}
+	else
+	{
+		// Epic Comment :D // PS4
+		UHeadMountedDisplayFunctionLibrary::SetTrackingOrigin(EHMDTrackingOrigin::Eye);
+		CameraBase->AddLocalOffset(FVector(0.0f, 0.0f, DefaultPlayerHeight));
 
-	//	// Epic Comment :D // Force Enable. PS Move lacks thumbstick input, this option lets user adjust pawn orientation during teleport using controller Roll motion.
-	//	bUseControllerRollToRotate = true;
-	//}
+		// Epic Comment :D // Force Enable. PS Move lacks thumbstick input, this option lets user adjust pawn orientation during teleport using controller Roll motion.
+		bUseControllerRollToRotate = true;
+	}
 
 	// Epic Comment :D // Spawn and attach both motion controllers
 
@@ -65,6 +70,7 @@ void AVR_Player::BeginPlay()
 		LeftController->Hand = EControllerHand::Left;
 		LeftController->FinishSpawning(SpawnTransform); // UGameplayStatics::FinishSpawningActor(LeftController, SpawnTransform);
 		LeftController->AttachToComponent(CameraBase, AttachRules);
+		
 	}
 
 	RightController = GetWorld()->SpawnActorDeferred<AVR_MotionController>(AVR_MotionController::StaticClass(), SpawnTransform, this, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
@@ -75,20 +81,20 @@ void AVR_Player::BeginPlay()
 		RightController->AttachToComponent(CameraBase, AttachRules);
 	}
 
-	RifleHolder = GetWorld()->SpawnActorDeferred<AVR_RifleHolder>(AVR_RifleHolder::StaticClass(), FTransform(FRotator(0.0f, 0.0f, 0.0f), FVector(20.0f, 0.0f, 0.0f), FVector(1.0f, 1.0f, 1.0f)), this, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+
+	RifleHolder = Cast<AVR_ItemHolder>(RifleHolderComponent->GetChildActor());
+	if (RifleHolder->IsValidLowLevel())
+	{
+		GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Yellow, TEXT("Holder!"), true, FVector2D(10.0f, 10.0f));
+		RifleHolder->SetTargetItemClass(AVR_Rifle::StaticClass());
+	}
+	/*RifleHolder = GetWorld()->SpawnActorDeferred<AVR_ItemHolder>(AVR_ItemHolder::StaticClass(), SpawnTransform, this, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
 	if (RifleHolder)
 	{
-		RifleHolder->FinishSpawning(FTransform(FRotator(0.0f, 0.0f, 0.0f), FVector(-20.0f, 0.0f, 5.0f), FVector(1.0f, 1.0f, 1.0f)));
-		RifleHolder->AttachToComponent(VRCamera, FAttachmentTransformRules(EAttachmentRule::KeepRelative, EAttachmentRule::SnapToTarget, EAttachmentRule::KeepWorld, false));
-	}
-
-	CrossBowHolder = GetWorld()->SpawnActorDeferred<AVR_CrossBowHolder>(AVR_CrossBowHolder::StaticClass(), FTransform(FRotator(0.0f, 0.0f, 0.0f), FVector(0.0f, -10.0f, -50.0f), FVector(1.0f, 1.0f, 1.0f)), this, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
-	if (CrossBowHolder)
-	{
-		CrossBowHolder->FinishSpawning(FTransform(FRotator(0.0f, 0.0f, 0.0f), FVector(0.0f, -10.0f, -50.0f), FVector(1.0f, 1.0f, 1.0f)));
-		CrossBowHolder->AttachToComponent(VRCamera, FAttachmentTransformRules(EAttachmentRule::KeepRelative , EAttachmentRule::SnapToTarget, EAttachmentRule::KeepWorld, false));
-	}
-
+		RifleHolder->SetTargetItemClass(AVR_Rifle::StaticClass());
+		RifleHolder->FinishSpawning(SpawnTransform);
+		RifleHolder->AttachToComponent(VRCamera, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::KeepWorld, false));
+	}*/
 }
 
 // Called every frame
@@ -108,11 +114,6 @@ void AVR_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 	PlayerInputComponent->BindAction("R_Thumb_Bottom", IE_Released, this, &AVR_Player::R_ThumbBottom_Released);
 	PlayerInputComponent->BindAction("L_Thumb_Bottom", IE_Pressed, this, &AVR_Player::L_ThumbBottom_Pressed);
 	PlayerInputComponent->BindAction("L_Thumb_Bottom", IE_Released, this, &AVR_Player::L_ThumbBottom_Released);
-	// SomWorks :D // Bind Grab events
-	//PlayerInputComponent->BindAction("GrabLeft", IE_Pressed, this, &AVR_Player::GrabActor_Left);
-	//PlayerInputComponent->BindAction("GrabLeft", IE_Released, this, &AVR_Player::ReleaseActor_Left);
-	//PlayerInputComponent->BindAction("GrabRight", IE_Pressed, this, &AVR_Player::GrabActor_Right);
-	//PlayerInputComponent->BindAction("GrabRight", IE_Released, this, &AVR_Player::ReleaseActor_Right);
 	
 	PlayerInputComponent->BindAxis("L_TriggerButton", this, &AVR_Player::Trigger_Left);
 	PlayerInputComponent->BindAxis("R_TriggerButton", this, &AVR_Player::Trigger_Right);
@@ -122,12 +123,6 @@ void AVR_Player::OnResetVR()
 {
 	UHeadMountedDisplayFunctionLibrary::ResetOrientationAndPosition();
 }
-
-
-//void AVR_Player::GrabActor_Left()
-//{
-//	LeftController->TriggerPull();
-//}
 
 void AVR_Player::ReleaseActor_Left()
 {
@@ -139,10 +134,6 @@ void AVR_Player::Trigger_Left(float val)
 	LeftController->ReceiveTriggerPostion(val);
 }
 
-//void AVR_Player::GrabActor_Right()
-//{
-//	RightController->TriggerPull();
-//}
 
 void AVR_Player::Trigger_Right(float val)
 {
@@ -253,7 +244,7 @@ void AVR_Player::L_ThumbBottom_Released()
 
 float AVR_Player::GetAngleVector2D(FVector2D vector)
 {
-	FVector2D normalize2D = vector.Normalize;
+	FVector2D normalize2D = vector.GetSafeNormal();
 
 	if (asinf(normalize2D.Y)<0.0f)
 	{

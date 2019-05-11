@@ -46,17 +46,19 @@ AVR_MotionController::AVR_MotionController()
 
 	RootComponent = RootScene;
 
-	MotionController->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
-	HandMesh->SetRelativeRotation(FRotator(0.0f, -45.0f, 0.0f));
-	MotionController->SetCollisionProfileName(TEXT("BlockAll"));
+	/*MotionController->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
+	HandMesh->SetRelativeRotation(FRotator(0.0f,0.0f, 0.0f));
+	MotionController->SetCollisionProfileName(TEXT("BlockAll"));*/
+
 
 	// SomWorks :D // Setup Components
-	MotionController->SetupAttachment(RotateDummy);
+	MotionController->SetupAttachment(RootComponent);
 	MotionController->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
 	MotionController->SetCollisionProfileName(TEXT("BlockAll"));
 
 	RotateDummy->SetupAttachment(MotionController);
-	RotateDummy->SetRelativeRotation(FRotator(0.0f, -45.0f, 0.0f));
+	RotateDummy->SetRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
+
 	DirectionPoint->SetupAttachment(RotateDummy);
 	DirectionPoint->SetRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
 
@@ -113,7 +115,7 @@ void AVR_MotionController::BeginPlay()
 
 	if (Hand == EControllerHand::Left)
 	{
-		HandMesh->SetWorldScale3D(FVector(1.0f, 1.0f, -1.0f));
+		HandMesh->SetWorldScale3D(FVector(1.0f, -1.0f, 1.0f));
 
 		//const FTransform SpawnTransform = FTransform(FRotator(0.0f, 0.0f, 0.0f), FVector(0.0f, 0.0f, 0.0f), FVector(1.0f, 1.0f, 1.0f)); // = FTransform::Identity;
 		//FAttachmentTransformRules AttachRules(EAttachmentRule::KeepRelative, EAttachmentRule::KeepRelative, EAttachmentRule::KeepWorld, false);
@@ -437,20 +439,23 @@ void AVR_MotionController::StopRumbleController()
 // Epic Comment :D // Rumble Controller when overlapping valid StaticMesh
 void AVR_MotionController::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (CatchedComp->GetOwner() == nullptr)
+	if (CatchedComp->IsValidLowLevel())
 	{
-		if (HandOverlappedComps.AddUnique(OtherComp) == 0)
-		{
-			StartRumbleController(0.1,true);
-		}
-	}
-	else
-	{
-		if (OtherActor != nullptr)
+		if (CatchedComp->GetOwner()->IsValidLowLevel())
 		{
 			if (HandOverlappedComps.AddUnique(OtherComp) == 0)
 			{
-				StartRumbleController(0.1,true);
+				StartRumbleController(0.1, true);
+			}
+		}
+		else
+		{
+			if (OtherActor != nullptr)
+			{
+				if (HandOverlappedComps.AddUnique(OtherComp) == 0)
+				{
+					StartRumbleController(0.1, true);
+				}
 			}
 		}
 	}
@@ -504,6 +509,10 @@ void AVR_MotionController::UpdateHandAnimation()
 	// Epic Comment :D // Update the animation state of the hand mesh.
 	UVR_HandAnimInstance* HandAnimation = Cast<UVR_HandAnimInstance>(HandMesh->GetAnimInstance());
 	HandAnimation->SetGripState(CurrentGripState);
+	if (CurrentGripState == EGrip_Code::Grab)
+	{
+		GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Yellow,TEXT("Grip!") , true, FVector2D(10.0f, 10.0f));
+	}
 	//HandAnimation->SetGripState(GripValue);
 
 	// Epic Comment :D // Only let hand collide with environment while gripping
@@ -598,6 +607,7 @@ void AVR_MotionController::ReceiveTriggerPostion(float val)
 	{
 		if (TriggerValue < TriggerReleaseLimit)
 		{
+			CurrentGripState = EGrip_Code::Open;
 			TriggerRelease();
 			TriggerState = false;
 		}
@@ -606,6 +616,7 @@ void AVR_MotionController::ReceiveTriggerPostion(float val)
 	{
 		if (TriggerValue >= TriggerPullLimit)
 		{
+			CurrentGripState = EGrip_Code::Grab;
 			TriggerPull();
 			TriggerState = true;
 		}
@@ -637,8 +648,6 @@ USceneComponent* AVR_MotionController::GetAttachingPoint()
 USkeletalMeshComponent* AVR_MotionController::GetHandMesh()
 {
 	return HandMesh;
-
-	
 }
 
 void AVR_MotionController::ThumbBottom(bool T_Down_F_Up)

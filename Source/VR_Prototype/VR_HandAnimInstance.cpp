@@ -8,6 +8,7 @@ UVR_HandAnimInstance::UVR_HandAnimInstance()
 	//GripValue = 0;
 	RifleGraped = false;
 	CurrentGripState = EGrip_Code::Open;
+	CurrentRifleGripState = ERifleGripState::NoGrip;
 	//CurrentWeaponState = EWeaponState_Code::Idle;
 }
 //
