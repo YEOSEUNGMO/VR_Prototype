@@ -23,8 +23,8 @@ class VR_PROTOTYPE_API AVR_Player : public APawn
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player", meta = (AllowPrivateAccess = "true"))
 		class AVR_ItemHolder* RifleHolder;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player", meta = (AllowPrivateAccess = "true"))
-		class UChildActorComponent* RifleHolderComponent;
+	/*UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player", meta = (AllowPrivateAccess = "true"))
+		class UChildActorComponent* RifleHolderComponent;*/
 public:
 	// Sets default values for this pawn's properties
 	AVR_Player();

@@ -18,19 +18,20 @@ AVR_ItemHolder::AVR_ItemHolder()
 	RootComponent = ItemHolderCollision;
 
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 	TargetItemClass = nullptr;
 	HoldingItem = nullptr;
-	HoldedWithVisible = true;
-	ItemIsUnique = true;
-	ItemRegenTime = 2.0;
+	HoldedWithVisible = false;
+	ItemIsUnique = false;
+	ItemRegenTime = 0.0f;
 }
 
 // Called when the game starts or when spawned
 void AVR_ItemHolder::BeginPlay()
 {
 	Super::BeginPlay();
-	makeItem();
+	GetWorldTimerManager().SetTimer(makeItemdelay, this, &AVR_ItemHolder::makeItem, 0.5f);
+	//makeItem();
 }
 
 //// Called every frame
@@ -53,12 +54,21 @@ void AVR_ItemHolder::makeItem()
 	FActorSpawnParameters parameter;
 	parameter.Owner = this;
 
+	//GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Yellow, FString::SanitizeFloat(ItemRegenTime) , true, FVector2D(10.0f, 10.0f));
 	if (TargetItemClass->IsValidLowLevel())
 	{
-		GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Yellow, TargetItemClass->GetName(), true, FVector2D(10.0f, 10.0f));
-		spawnActor = GetWorld()->SpawnActorDeferred<AActor>(TargetItemClass->GetClass(), SpawnTransform, this, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
-		ItemIn_Implementation(spawnActor, nullptr);
+		GEngine->AddOnScreenDebugMessage(0, 2.0f, FColor::Yellow, TargetItemClass->GetName(), true, FVector2D(10.0f, 10.0f));
+		spawnActor = GetWorld()->SpawnActorDeferred<AActor>(TargetItemClass->StaticClass(), SpawnTransform, this, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+		//spawnActor = GetWorld()->SpawnActor(TargetItemClass->StaticClass(),FActorSpawnParameters::SpawnCollisionHandlingOverride);
+		if(spawnActor)
+			ItemIn_Implementation(spawnActor, nullptr);
+		else
+			GEngine->AddOnScreenDebugMessage(0, 2.0f, FColor::Red, TEXT("Spawn error"), true, FVector2D(10.0f, 10.0f));
 	}
+	else
+		GEngine->AddOnScreenDebugMessage(0, 2.0f, FColor::Red, TEXT("Target error"), true, FVector2D(10.0f, 10.0f));
+
+	GetWorldTimerManager().ClearTimer(makeItemdelay);
 }
 
 bool AVR_ItemHolder::ItemIn_Implementation(AActor* Actor, class USceneComponent* Component)
@@ -199,4 +209,29 @@ void AVR_ItemHolder::SetDropWhenReleased(bool val)
 USceneComponent* AVR_ItemHolder::GetBaseCatchingComp_Implementation()
 {
 	return ItemHolderCollision;
+}
+
+void AVR_ItemHolder::SetItemRegenTime(float val)
+{
+	ItemRegenTime = val;
+}
+
+void AVR_ItemHolder::SetTargetItemClass(UClass* val)
+{
+	TargetItemClass = val;
+}
+
+void AVR_ItemHolder::SetItemIsUnique(float val)
+{
+	ItemIsUnique = val;
+}
+
+void AVR_ItemHolder::SetHoldedWithVisible(float val)
+{
+	HoldedWithVisible = val;
+}
+
+void AVR_ItemHolder::SetItemHolded(float val)
+{
+	ItemHolded = val;
 }

@@ -22,14 +22,15 @@ AVR_Player::AVR_Player()
 	RootScene = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
 	CameraBase = CreateDefaultSubobject<USceneComponent>(TEXT("VROrigin"));
 	VRCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
-	RifleHolderComponent = CreateDefaultSubobject<UChildActorComponent>(TEXT("RifleHolderComponent"));
+	//RifleHolderComponent = CreateDefaultSubobject<UChildActorComponent>(TEXT("RifleHolderComponent"));
 
 	RootComponent = RootScene;
 	CameraBase->SetupAttachment(RootComponent);
 	VRCamera->SetupAttachment(CameraBase);
-	RifleHolderComponent->SetupAttachment(VRCamera);
-	RifleHolderComponent->SetChildActorClass(AVR_ItemHolder::StaticClass());
-	RifleHolderComponent->SetRelativeLocation(FVector(-50.0f,0.0f,33.0f));
+
+	//RifleHolderComponent->SetupAttachment(VRCamera);
+	//RifleHolderComponent->SetRelativeLocation(FVector(-50.0f,0.0f,33.0f));
+
 	DefaultPlayerHeight = 100.0f;
 	bUseControllerRollToRotate = false;
 
@@ -81,20 +82,30 @@ void AVR_Player::BeginPlay()
 		RightController->AttachToComponent(CameraBase, AttachRules);
 	}
 
+	//RifleHolderComponent->CreateChildActor();
+	//RifleHolderComponent->SetChildActorClass(AVR_ItemHolder::StaticClass());
+	//AVR_ItemHolder* RifleHolder = Cast<AVR_ItemHolder>(RifleHolderComponent->GetChildActor());
+	//if (RifleHolder->IsValidLowLevel())
+	//{
+	//	RifleHolder->SetTargetItemClass(AVR_Rifle::StaticClass());
+	//	RifleHolder->SetItemIsUnique(true);
+	//	RifleHolder->SetHoldedWithVisible(false);
+	//	RifleHolder->SetItemHolded(true);
+	//	RifleHolder->SetItemRegenTime(2.0f);
+	//}
 
-	RifleHolder = Cast<AVR_ItemHolder>(RifleHolderComponent->GetChildActor());
-	if (RifleHolder->IsValidLowLevel())
-	{
-		GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Yellow, TEXT("Holder!"), true, FVector2D(10.0f, 10.0f));
-		RifleHolder->SetTargetItemClass(AVR_Rifle::StaticClass());
-	}
-	/*RifleHolder = GetWorld()->SpawnActorDeferred<AVR_ItemHolder>(AVR_ItemHolder::StaticClass(), SpawnTransform, this, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+	RifleHolder = GetWorld()->SpawnActorDeferred<AVR_ItemHolder>(AVR_ItemHolder::StaticClass(), SpawnTransform, this, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
 	if (RifleHolder)
 	{
 		RifleHolder->SetTargetItemClass(AVR_Rifle::StaticClass());
+		RifleHolder->SetItemIsUnique(true);
+		RifleHolder->SetHoldedWithVisible(false);
+		RifleHolder->SetItemHolded(true);
+		RifleHolder->SetItemRegenTime(2.0f);
 		RifleHolder->FinishSpawning(SpawnTransform);
 		RifleHolder->AttachToComponent(VRCamera, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::KeepWorld, false));
-	}*/
+		RifleHolder->SetActorRelativeLocation(FVector(-50.0f, 0.0f, 33.0f));
+	}
 }
 
 // Called every frame

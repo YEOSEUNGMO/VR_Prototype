@@ -27,23 +27,32 @@ class VR_PROTOTYPE_API AVR_ItemHolder : public AActor ,public IIN_ItemOwner,publ
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditDefaultsOnly, Category = "ItemHolder")
-		TSubclassOf<UClass> TargetItemClass;
-	UPROPERTY(EditDefaultsOnly, Category = "ItemHolder")
-		AActor* HoldingItem;
-	UPROPERTY(VisibleDefaultsOnly, Category = "ItemHolder")
+	/*UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ItemHolder", meta = (AllowPrivateAccess = "true"))
+		TSubclassOf<UClass> TargetItemClass;*/
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ItemHolder", meta = (AllowPrivateAccess = "true"))
+		class UClass* TargetItemClass;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ItemHolder", meta = (AllowPrivateAccess = "true"))
+		class AActor* HoldingItem;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ItemHolder", meta = (AllowPrivateAccess = "true"))
 		class UBoxComponent* ItemHolderCollision;
-	UPROPERTY(VisibleDefaultsOnly, Category = "ItemHolder")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ItemHolder", meta = (AllowPrivateAccess = "true"))
 		bool HoldedWithVisible;
-	UPROPERTY(VisibleDefaultsOnly, Category = "ItemHolder")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ItemHolder", meta = (AllowPrivateAccess = "true"))
 		bool DropWhenReleased;
-	UPROPERTY(VisibleDefaultsOnly, Category = "ItemHolder")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ItemHolder", meta = (AllowPrivateAccess = "true"))
 		bool ItemIsUnique;
-	UPROPERTY(VisibleDefaultsOnly, Category = "ItemHolder")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ItemHolder", meta = (AllowPrivateAccess = "true"))
+		bool ItemHolded;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ItemHolder", meta = (AllowPrivateAccess = "true"))
 		FTimerHandle RegenTimerHandle;
-	UPROPERTY(VisibleDefaultsOnly, Category = "ItemHolder")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ItemHolder", meta = (AllowPrivateAccess = "true"))
 		float ItemRegenTime;
-	PRIVATE_MEMBER(TSubclassOf<UClass>, TargetItemClass)
+	/*PRIVATE_MEMBER(TSubclassOf<UClass>, TargetItemClass)
+	PRIVATE_MEMBER(bool, ItemIsUnique)
+	PRIVATE_MEMBER(bool, HoldedWithVisible)
+	PRIVATE_MEMBER(bool, ItemHolded)
+	PRIVATE_MEMBER(float, ItemRegenTime)*/
+
 public:	
 	// Sets default values for this actor's properties
 	AVR_ItemHolder();
@@ -63,9 +72,21 @@ public:
 		void HoldingItemVisible(bool Visible);
 	UFUNCTION(BlueprintCallable, Category = "ItemHoler")
 		void SetDropWhenReleased(bool val);
+	UFUNCTION(BlueprintCallable, Category = "ItemHoler")
+		void SetTargetItemClass(UClass* val);
+	UFUNCTION(BlueprintCallable, Category = "ItemHoler")
+		void SetItemIsUnique(float val);
+	UFUNCTION(BlueprintCallable, Category = "ItemHoler")
+		void SetHoldedWithVisible(float val);
+	UFUNCTION(BlueprintCallable, Category = "ItemHoler")
+		void SetItemHolded(float val);
+	UFUNCTION(BlueprintCallable, Category = "ItemHoler")
+		void SetItemRegenTime(float val);
 
 	virtual bool ItemIn_Implementation(AActor* Actor, class USceneComponent* Component);
 	virtual bool ItemOut_Implementation(AActor* Actor);
 	virtual USceneComponent* Catched_Implementation(class USceneComponent* ItemComponent, AActor* Owner, class USceneComponent* OwnerComponent, FName SocketName, bool HoldedWithVisible);
 	virtual USceneComponent* GetBaseCatchingComp_Implementation();
+
+	FTimerHandle makeItemdelay;
 };
