@@ -3,21 +3,22 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Engine/TriggerBase.h"
+#include "VR_ItemHolder.h"
 #include "VR_RifleHolder.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class VR_PROTOTYPE_API AVR_RifleHolder : public ATriggerBase
+class VR_PROTOTYPE_API AVR_RifleHolder : public AVR_ItemHolder
 {
 	GENERATED_BODY()
 
-	UPROPERTY(VisibleDefaultsOnly, Category = "RifleHolder")
-		class UBoxComponent* RifleHolderCollision;
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
 public:
 	// Sets default values for this actor's properties
 	AVR_RifleHolder();
-
+	virtual void makeItem();
 };

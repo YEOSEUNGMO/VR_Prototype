@@ -10,6 +10,7 @@
 #include "HeadMountedDisplayFunctionLibrary.h"
 #include "VR_MotionController.h"
 #include "VR_ItemHolder.h"
+#include "VR_RifleHolder.h"
 #include "VR_Rifle.h"
 #include "Components/ChildActorComponent.h"
 
@@ -94,14 +95,9 @@ void AVR_Player::BeginPlay()
 	//	RifleHolder->SetItemRegenTime(2.0f);
 	//}
 
-	RifleHolder = GetWorld()->SpawnActorDeferred<AVR_ItemHolder>(AVR_ItemHolder::StaticClass(), SpawnTransform, this, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+	RifleHolder = GetWorld()->SpawnActorDeferred<AVR_RifleHolder>(AVR_RifleHolder::StaticClass(), SpawnTransform, this, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
 	if (RifleHolder)
 	{
-		RifleHolder->SetTargetItemClass(AVR_Rifle::StaticClass());
-		RifleHolder->SetItemIsUnique(true);
-		RifleHolder->SetHoldedWithVisible(false);
-		RifleHolder->SetItemHolded(true);
-		RifleHolder->SetItemRegenTime(2.0f);
 		RifleHolder->FinishSpawning(SpawnTransform);
 		RifleHolder->AttachToComponent(VRCamera, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::KeepWorld, false));
 		RifleHolder->SetActorRelativeLocation(FVector(-50.0f, 0.0f, 33.0f));

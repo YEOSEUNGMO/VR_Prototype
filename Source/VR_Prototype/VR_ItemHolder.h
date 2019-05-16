@@ -27,26 +27,15 @@ class VR_PROTOTYPE_API AVR_ItemHolder : public AActor ,public IIN_ItemOwner,publ
 {
 	GENERATED_BODY()
 
-	/*UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ItemHolder", meta = (AllowPrivateAccess = "true"))
-		TSubclassOf<UClass> TargetItemClass;*/
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ItemHolder", meta = (AllowPrivateAccess = "true"))
-		class UClass* TargetItemClass;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ItemHolder", meta = (AllowPrivateAccess = "true"))
-		class AActor* HoldingItem;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ItemHolder", meta = (AllowPrivateAccess = "true"))
 		class UBoxComponent* ItemHolderCollision;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ItemHolder", meta = (AllowPrivateAccess = "true"))
-		bool HoldedWithVisible;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ItemHolder", meta = (AllowPrivateAccess = "true"))
 		bool DropWhenReleased;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ItemHolder", meta = (AllowPrivateAccess = "true"))
-		bool ItemIsUnique;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ItemHolder", meta = (AllowPrivateAccess = "true"))
-		bool ItemHolded;
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ItemHolder", meta = (AllowPrivateAccess = "true"))
 		FTimerHandle RegenTimerHandle;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ItemHolder", meta = (AllowPrivateAccess = "true"))
-		float ItemRegenTime;
+	
 	/*PRIVATE_MEMBER(TSubclassOf<UClass>, TargetItemClass)
 	PRIVATE_MEMBER(bool, ItemIsUnique)
 	PRIVATE_MEMBER(bool, HoldedWithVisible)
@@ -60,14 +49,25 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ItemHolder", meta = (AllowPrivateAccess = "true"))
+		class AActor* HoldingItem;
 
-
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ItemHolder", meta = (AllowPrivateAccess = "true"))
+		TSubclassOf<UClass> TargetItemClass;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ItemHolder", meta = (AllowPrivateAccess = "true"))
+		bool HoldedWithVisible;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ItemHolder", meta = (AllowPrivateAccess = "true"))
+		float ItemRegenTime;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ItemHolder", meta = (AllowPrivateAccess = "true"))
+		bool ItemHolded;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ItemHolder", meta = (AllowPrivateAccess = "true"))
+		bool ItemIsUnique;
 public:	
 	// Called every frame
 	//virtual void Tick(float DeltaTime) override;
 
 	UFUNCTION(BlueprintCallable, Category = "ItemHoler")
-		void makeItem();
+		virtual void makeItem();
 	UFUNCTION(BlueprintCallable, Category = "ItemHoler")
 		void HoldingItemVisible(bool Visible);
 	UFUNCTION(BlueprintCallable, Category = "ItemHoler")

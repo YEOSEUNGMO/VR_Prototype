@@ -19,7 +19,7 @@ AVR_ItemHolder::AVR_ItemHolder()
 
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
-	TargetItemClass = nullptr;
+	//TargetItemClass = nullptr;
 	HoldingItem = nullptr;
 	HoldedWithVisible = false;
 	ItemIsUnique = false;
@@ -30,8 +30,8 @@ AVR_ItemHolder::AVR_ItemHolder()
 void AVR_ItemHolder::BeginPlay()
 {
 	Super::BeginPlay();
-	GetWorldTimerManager().SetTimer(makeItemdelay, this, &AVR_ItemHolder::makeItem, 0.5f);
-	//makeItem();
+	//GetWorldTimerManager().SetTimer(makeItemdelay, this, &AVR_ItemHolder::makeItem, 0.5f);
+	makeItem();
 }
 
 //// Called every frame
@@ -106,7 +106,7 @@ bool AVR_ItemHolder::ItemIn_Implementation(AActor* Actor, class USceneComponent*
 			/*Sequence 2*/
 			if (CatchableActor)
 			{
-				CatchableActor->Catched_Implementation(Component, this, ItemHolderCollision, "", HoldedWithVisible);
+				CatchableActor->Catched(Component, this, ItemHolderCollision, "", HoldedWithVisible);
 			}
 			return true;
 		}
@@ -164,7 +164,7 @@ USceneComponent* AVR_ItemHolder::Catched_Implementation(USceneComponent* ItemCom
 		IIN_CatchableItem* CatchableActor = Cast<IIN_CatchableItem>(temp);
 		if (CatchableActor)
 		{
-			RealCathed = CatchableActor->Catched_Implementation(CatchableActor->GetBaseCatchingComp(), Owner, OwnerComponent, "", false);
+			RealCathed = CatchableActor->Catched(CatchableActor->GetBaseCatchingComp(), Owner, OwnerComponent, "", false);
 		}
 		if (RealCathed != nullptr)
 		{
