@@ -83,18 +83,6 @@ void AVR_Player::BeginPlay()
 		RightController->AttachToComponent(CameraBase, AttachRules);
 	}
 
-	//RifleHolderComponent->CreateChildActor();
-	//RifleHolderComponent->SetChildActorClass(AVR_ItemHolder::StaticClass());
-	//AVR_ItemHolder* RifleHolder = Cast<AVR_ItemHolder>(RifleHolderComponent->GetChildActor());
-	//if (RifleHolder->IsValidLowLevel())
-	//{
-	//	RifleHolder->SetTargetItemClass(AVR_Rifle::StaticClass());
-	//	RifleHolder->SetItemIsUnique(true);
-	//	RifleHolder->SetHoldedWithVisible(false);
-	//	RifleHolder->SetItemHolded(true);
-	//	RifleHolder->SetItemRegenTime(2.0f);
-	//}
-
 	RifleHolder = GetWorld()->SpawnActorDeferred<AVR_RifleHolder>(AVR_RifleHolder::StaticClass(), SpawnTransform, this, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
 	if (RifleHolder)
 	{

@@ -2,20 +2,6 @@
 
 #pragma once
 
-#define PRIVATE_MEMBER(Type,Name)\
-private:\
-	Type m_##Name;\
-public:\
-	inline const Type& Get##Name() const\
-	{\
-		return this->m_##Name;\
-	}\
-	inline void Set##Name(const Type& in##Name)\
-	{\
-		this->m_##Name=in##Name;\
-	}\
-private:\
-
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "IN_ItemOwner.h"
@@ -35,12 +21,7 @@ class VR_PROTOTYPE_API AVR_ItemHolder : public AActor ,public IIN_ItemOwner,publ
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ItemHolder", meta = (AllowPrivateAccess = "true"))
 		FTimerHandle RegenTimerHandle;
-	
-	/*PRIVATE_MEMBER(TSubclassOf<UClass>, TargetItemClass)
-	PRIVATE_MEMBER(bool, ItemIsUnique)
-	PRIVATE_MEMBER(bool, HoldedWithVisible)
-	PRIVATE_MEMBER(bool, ItemHolded)
-	PRIVATE_MEMBER(float, ItemRegenTime)*/
+
 
 public:	
 	// Sets default values for this actor's properties
@@ -87,6 +68,4 @@ public:
 	virtual bool ItemOut_Implementation(AActor* Actor);
 	virtual USceneComponent* Catched_Implementation(class USceneComponent* ItemComponent, AActor* Owner, class USceneComponent* OwnerComponent, FName SocketName, bool HoldedWithVisible);
 	virtual USceneComponent* GetBaseCatchingComp_Implementation();
-
-	FTimerHandle makeItemdelay;
 };

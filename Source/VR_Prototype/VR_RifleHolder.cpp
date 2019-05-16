@@ -36,16 +36,11 @@ void AVR_RifleHolder::makeItem()
 	parameter.Owner = this;
 
 	//GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Yellow, FString::SanitizeFloat(ItemRegenTime) , true, FVector2D(10.0f, 10.0f));
-	if (TargetItemClass->IsValidLowLevel())
-	{
-		GEngine->AddOnScreenDebugMessage(0, 2.0f, FColor::Yellow, TargetItemClass->GetName(), true, FVector2D(10.0f, 10.0f));
-		spawnActor = GetWorld()->SpawnActorDeferred<AActor>(TargetItemClass->StaticClass(), SpawnTransform, this, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
-		//spawnActor = GetWorld()->SpawnActor(TargetItemClass->StaticClass(),FActorSpawnParameters::SpawnCollisionHandlingOverride);
-		if (spawnActor)
-			ItemIn_Implementation(spawnActor, nullptr);
-		else
-			GEngine->AddOnScreenDebugMessage(0, 2.0f, FColor::Red, TEXT("Spawn error"), true, FVector2D(10.0f, 10.0f));
-	}
+
+	spawnActor = GetWorld()->SpawnActorDeferred<AVR_Rifle>(AVR_Rifle::StaticClass(), SpawnTransform, this, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+	if (spawnActor)
+		ItemIn_Implementation(spawnActor, nullptr);
 	else
-		GEngine->AddOnScreenDebugMessage(0, 2.0f, FColor::Red, TEXT("Target error"), true, FVector2D(10.0f, 10.0f));
+		GEngine->AddOnScreenDebugMessage(0, 2.0f, FColor::Red, TEXT("Spawn error"), true, FVector2D(10.0f, 10.0f));
+
 }

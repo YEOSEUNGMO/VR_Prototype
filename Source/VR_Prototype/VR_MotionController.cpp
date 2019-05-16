@@ -153,10 +153,12 @@ UPrimitiveComponent* AVR_MotionController::GetComponentNearHand() const
 
 	for (UPrimitiveComponent* Components : OverlapComponents)
 	{
-		IIN_CatchableItem* NearActor = Cast<IIN_CatchableItem>(Components->GetOwner());
-		if (NearActor)
+		//IIN_CatchableItem* NearActor = Cast<IIN_CatchableItem>(Components->GetOwner());
+		//if (NearActor)
+		if(Components->GetOwner()->GetClass()->ImplementsInterface(UIN_CatchableItem::StaticClass()))
 		{
-			NearActor->IsCatchableComp(Components);
+			IIN_CatchableItem::Execute_IsCatchableComp(Components->GetOwner(), Components);
+			//NearActor->IsCatchableComp(Components);
 			float MyLength = (Components->GetComponentLocation() - GrabSphereLocation).Size();
 			// float MyLengthSquared = (Actors->GetActorLocation() - GrabSphereLocation).SizeSquared();
 
@@ -165,6 +167,10 @@ UPrimitiveComponent* AVR_MotionController::GetComponentNearHand() const
 				NearestOverlappingComponent = Components;
 				NearestOverlap = MyLength;
 			}
+		}
+		else
+		{
+			GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Yellow, TEXT("Iter_Error"), true, FVector2D(10.0f, 10.0f));
 		}
 		//Epic Comment :D // Filter to Actors that implement our interface for pickup/dropping
 		//bool bHasInterface = NearActor->GetClass()->ImplementsInterface(UIN_CatchableItem::StaticClass());
@@ -230,59 +236,6 @@ void  AVR_MotionController::TriggerPull()
 				TriggerReleaseActions.AddUObject(this, &AVR_MotionController::ItemDropByTrigger);
 			}
 
-
-			//구버전
-			//if (CatchedComp->GetClass()->IsChildOf(AVR_RifleHolder::StaticClass()))		//RifleHolder에 손을 댓는지 확인.
-			//{
-			//	if (!playerInfo->GetOnRifle()&&!EquipedCrossBow)//다른손에 라이플이 장착 됬는지 확인,현재 손에 크로스보우가 장착되어있는지 확인.  //AVR_Player::GetOnRifle()
-			//	{
-			//		if (!EquipedRifle)//내손에 라이플이 장착된 상태가 아니라면.
-			//		{
-			//			Rifle = GetWorld()->SpawnActorDeferred<AVR_Rifle>(AVR_Rifle::StaticClass(), SpawnTransform, this, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);//라이플 스폰
-			//			if (Rifle)
-			//			{
-			//				playerInfo->SetOnRifle(true);				//AVR_Player::SetOnRifle(true);
-			//				EquipedRifle = true;
-			//				RifleMainHand = true;
-			//				HandAnimation->SetWeaponState(EWeaponState_Code::RifleMain);
-			//				Rifle->FinishSpawning(SpawnTransform);
-			//				Rifle->AttachToComponent(HandMesh, AttachRules);
-			//				Rifle->setMainHand(this);
-			//			}
-			//		}
-			//	}
-			//	else if(EquipedRifle)//내 손에 무기가 장착 되있는지 확인.
-			//	{
-			//		playerInfo->SetOnRifle(false);		//AVR_Player::SetOnRifle(false);
-			//		EquipedRifle = false;
-			//		RifleMainHand = false;
-			//		HandAnimation->SetWeaponState(EWeaponState_Code::Idle);
-			//		Rifle->Destroy();
-			//	}
-			//}
-			//else if (CatchedComp->GetClass()->IsChildOf(AVR_CrossBowHolder::StaticClass()))
-			//{
-			//	if (!playerInfo->GetOnCrossBow()&&!EquipedRifle)//다른손에 라이플이 장착 됬는지 확인,현재 손에 라이플이 장착되어있는지 확인.		//AVR_Player::GetOnCrossBow
-			//	{
-			//		if (!EquipedCrossBow)//내손에 라이플이 장착된 상태가 아니라면.
-			//		{
-			//			CrossBow = GetWorld()->SpawnActorDeferred<AVR_CrossBow>(AVR_CrossBow::StaticClass(), SpawnTransform, this, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);//크로스보우 스폰
-			//			if (CrossBow)
-			//			{
-			//				playerInfo->SetOnCrossBow(true);		//AVR_Player::SetOnCrossBow(true);
-			//				EquipedCrossBow = true;
-			//				CrossBow->FinishSpawning(SpawnTransform);
-			//				CrossBow->AttachToComponent(HandMesh, AttachRules, TEXT("WeaponPoint"));
-			//			}
-			//		}
-			//	}
-			//	else if (EquipedCrossBow)//내 손에 무기가 장착 되있는지 확인.
-			//	{
-			//		playerInfo->SetOnCrossBow(false);		//AVR_Player::SetOnCrossBow(false);
-			//		EquipedCrossBow = false;
-			//		CrossBow->Destroy();
-			//	}
-			//}
 		}
 	}
 	//UVR_HandAnimInstance* HandAnimation = Cast<UVR_HandAnimInstance>(HandMesh->GetAnimInstance());
@@ -302,34 +255,7 @@ void AVR_MotionController::ItemDropByTrigger()
 void AVR_MotionController::TriggerRelease()
 {
 	TriggerReleaseActions.Broadcast();
-	//구버전
-	//FTimerManager& CrossBowTimer = GetWorld()->GetTimerManager();
-	////GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Red, TEXT("RELEASE!!"), true, FVector2D(10.0f, 10.0f));
-	//bWantsToGrip = false;
-	//if (EquipedCrossBow)
-	//{
-	//	CrossBowTimer.ClearTimer(CrossBowTimerHandle);
-	//}
-	//if (CatchedComp && CatchedComp->IsValidLowLevel() && !CatchedComp->IsPendingKill())
-	//{
-	//	//// Epic Comment :D // Make sure this hand is still holding the Actor (May have been taken by another hand / event)
-	//	//if (CatchedComp->GetRootComponent()->GetAttachParent() == MotionController)
-	//	//{
-	//	//	if (CatchedComp->GetClass()->ImplementsInterface(UVR_InteractionInterface::StaticClass()))
-	//	//	{
-	//	//		IVR_InteractionInterface::Execute_Drop(CatchedComp); // This is the Execute_* function. The asterisk means your function name. :)
-	//	//		RumbleController(0.2f);
-	//	//		// Epic Comment :D // Clear the reference
-	//	//		CatchedComp = nullptr;
-	//	//	}
-	//	//}
-	//	//else
-	//	//{
-	//	//	// Epic Comment :D // Clear the reference
-	//	//	CatchedComp = nullptr;
-	//	//}
-	//	CatchedComp = nullptr;
-	//}
+	
 }
 
 void  AVR_MotionController::GripPush()
@@ -348,6 +274,7 @@ void  AVR_MotionController::GripPush()
 		if (NearComponent != nullptr)
 		{
 			AVR_ItemHolder* ItemHolder =Cast<AVR_ItemHolder>(NearComponent->GetOwner());
+
 
 			ItemHolder->ItemIn_Implementation(CatchedComp->GetOwner(), CatchedComp);
 		}
@@ -534,10 +461,11 @@ bool AVR_MotionController::ItemIn_Implementation(AActor* Actor, class USceneComp
 	if (Actor!=nullptr)
 	{
 		/*Sequence 0*/
-		IIN_CatchableItem* CatchableActor = Cast<IIN_CatchableItem>(Actor);
+		//IIN_CatchableItem* CatchableActor = Cast<IIN_CatchableItem>(Actor);
+		bool bHasCatchableItemInterface = Actor->GetClass()->ImplementsInterface(UIN_CatchableItem::StaticClass());
 		if (Component != nullptr)
 		{
-			if (CatchableActor && Component == CatchableActor->GetBaseCatchingComp())
+			/*if (CatchableActor && Component == CatchableActor->GetBaseCatchingComp())
 			{
 				if (CatchableActor->GetHoldingOwner() != nullptr)
 				{
@@ -547,14 +475,27 @@ bool AVR_MotionController::ItemIn_Implementation(AActor* Actor, class USceneComp
 						ItemOwner->ItemOut(Actor);
 					}
 				}
+			}*/
+			if (bHasCatchableItemInterface && Component==IIN_CatchableItem::Execute_GetBaseCatchingComp(Actor))
+			{
+				AActor* HoldingOwner = IIN_CatchableItem::Execute_GetHoldingOwner(Actor);
+				if (HoldingOwner != nullptr)
+				{
+
+					bool bHasItemOwnerInterface = HoldingOwner->GetClass()->ImplementsInterface(UIN_ItemOwner::StaticClass());
+					if (bHasItemOwnerInterface)
+					{
+						IIN_ItemOwner::Execute_ItemOut(HoldingOwner,Actor);
+					}
+				}
 			}
 		}
 
 		/*Sequence 1*/
-		if (CatchableActor)
+		if (bHasCatchableItemInterface)
 		{
 			USceneComponent* RealCatchedComp;
-			RealCatchedComp = CatchableActor->Catched(Component, this, AttachingPoint, "", true);
+			/*RealCatchedComp = CatchableActor->Catched(Component, this, AttachingPoint, "", true);
 			if (RealCatchedComp->IsValidLowLevel())
 			{
 				CatchableActor = Cast<IIN_CatchableItem>(RealCatchedComp->GetOwner());
@@ -562,7 +503,23 @@ bool AVR_MotionController::ItemIn_Implementation(AActor* Actor, class USceneComp
 				{
 					DropWhenReleased = CatchableActor->IsDroppedWhenRelease(RealCatchedComp);
 					CatchedComp = RealCatchedComp;
-					StartRumbleController(0.7,false);
+					StartRumbleController(0.7, false);
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}*/
+			RealCatchedComp = IIN_CatchableItem::Execute_Catched(Actor, Component, this, AttachingPoint, "", true);
+			if (RealCatchedComp->IsValidLowLevel())
+			{
+				bHasCatchableItemInterface = RealCatchedComp->GetOwner()->GetClass()->ImplementsInterface(UIN_CatchableItem::StaticClass());
+				if (bHasCatchableItemInterface)
+				{
+					DropWhenReleased = IIN_CatchableItem::Execute_IsDroppedWhenRelease(RealCatchedComp->GetOwner(), RealCatchedComp);
+					CatchedComp = RealCatchedComp;
+					StartRumbleController(0.7, false);
 					return true;
 				}
 				else
@@ -582,10 +539,18 @@ bool AVR_MotionController::ItemOut_Implementation(AActor* Actor)
 
 	if (CatchedComp->GetOwner() == Actor&& CatchedComp !=nullptr)
 	{
-		IIN_CatchableItem* CatchableActor = Cast<IIN_CatchableItem>(CatchedComp->GetOwner());
+		/*IIN_CatchableItem* CatchableActor = Cast<IIN_CatchableItem>(CatchedComp->GetOwner());
 		if (CatchableActor)
 		{
 			CatchableActor->Dropped(this);
+			CatchedComp = nullptr;
+			return true;
+		}*/
+
+		bool bHasCatchableItemInterface = CatchedComp->GetOwner()->GetClass()->ImplementsInterface(UIN_CatchableItem::StaticClass());
+		if (bHasCatchableItemInterface)
+		{
+			IIN_CatchableItem::Execute_Dropped(CatchedComp->GetOwner(), this);
 			CatchedComp = nullptr;
 			return true;
 		}
@@ -654,7 +619,10 @@ void AVR_MotionController::ThumbBottom(bool T_Down_F_Up)
 {
 	if (CatchedComp != nullptr)
 	{
-		IIN_ButtonUsableItem* ButtonUsableItem = Cast<IIN_ButtonUsableItem>(CatchedComp->GetOwner());
-		ButtonUsableItem->BottomButton(T_Down_F_Up);		
+		/*IIN_ButtonUsableItem* ButtonUsableItem = Cast<IIN_ButtonUsableItem>(CatchedComp->GetOwner());
+		ButtonUsableItem->BottomButton(T_Down_F_Up);	*/
+		bool bHas_ButtonUsableItem_Interface = CatchedComp->GetOwner()->GetClass()->ImplementsInterface(UIN_ButtonUsableItem::StaticClass());
+		if (bHas_ButtonUsableItem_Interface)
+			IIN_ButtonUsableItem::Execute_BottomButton(CatchedComp->GetOwner(), T_Down_F_Up);
 	}
 }

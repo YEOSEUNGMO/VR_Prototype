@@ -3,6 +3,8 @@
 #include "VR_ItemHolder.h"
 #include "Components/BoxComponent.h"
 #include "VR_MotionController.h"
+#include "IN_CatchableItem.h"
+#include "IN_ButtonUsableItem.h"
 #include "Engine/Engine.h"
 #include "Engine/World.h"
 #include "TimerManager.h"
@@ -54,12 +56,12 @@ void AVR_ItemHolder::makeItem()
 	FActorSpawnParameters parameter;
 	parameter.Owner = this;
 
-	//GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Yellow, FString::SanitizeFloat(ItemRegenTime) , true, FVector2D(10.0f, 10.0f));
+	GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Yellow, FString::SanitizeFloat(ItemRegenTime) , true, FVector2D(10.0f, 10.0f));
 	if (TargetItemClass->IsValidLowLevel())
 	{
 		GEngine->AddOnScreenDebugMessage(0, 2.0f, FColor::Yellow, TargetItemClass->GetName(), true, FVector2D(10.0f, 10.0f));
 		spawnActor = GetWorld()->SpawnActorDeferred<AActor>(TargetItemClass->StaticClass(), SpawnTransform, this, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
-		//spawnActor = GetWorld()->SpawnActor(TargetItemClass->StaticClass(),FActorSpawnParameters::SpawnCollisionHandlingOverride);
+
 		if(spawnActor)
 			ItemIn_Implementation(spawnActor, nullptr);
 		else
@@ -67,8 +69,6 @@ void AVR_ItemHolder::makeItem()
 	}
 	else
 		GEngine->AddOnScreenDebugMessage(0, 2.0f, FColor::Red, TEXT("Target error"), true, FVector2D(10.0f, 10.0f));
-
-	GetWorldTimerManager().ClearTimer(makeItemdelay);
 }
 
 bool AVR_ItemHolder::ItemIn_Implementation(AActor* Actor, class USceneComponent* Component)
@@ -76,12 +76,14 @@ bool AVR_ItemHolder::ItemIn_Implementation(AActor* Actor, class USceneComponent*
 	FAttachmentTransformRules AttachRules(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::KeepWorld, false);
 	
 	
-	if (Actor->GetClass() == TargetItemClass)
+	if (Actor->StaticClass() == TargetItemClass)
 	{
+
+		
 		/*Sequence 0*/
 		if (HoldingItem == nullptr)
 		{
-			IIN_CatchableItem* CatchableActor = Cast<IIN_CatchableItem>(Actor);
+			/*IIN_CatchableItem* CatchableActor = Cast<IIN_CatchableItem>(Actor);
 			if (Component!=nullptr)
 			{
 				if (CatchableActor && Component == CatchableActor->GetBaseCatchingComp())
@@ -95,6 +97,23 @@ bool AVR_ItemHolder::ItemIn_Implementation(AActor* Actor, class USceneComponent*
 						}
 					}
 				}
+			}*/
+			bool bHas_CatchableItem_Interface = Actor->GetClass()->ImplementsInterface(UIN_CatchableItem::StaticClass());
+			if (Component != nullptr)
+			{
+				
+				if (bHas_CatchableItem_Interface&&Component == IIN_CatchableItem::Execute_GetBaseCatchingComp(Actor))
+				{
+					AActor* HoldingOwner = IIN_CatchableItem::Execute_GetHoldingOwner(Actor);
+					if (HoldingOwner != nullptr)
+					{
+						bool bHasItemOwnerInterface = HoldingOwner->GetClass()->ImplementsInterface(UIN_ItemOwner::StaticClass());
+						if (bHasItemOwnerInterface)
+						{
+							IIN_ItemOwner::Execute_ItemOut(HoldingOwner, Actor);
+						}
+					}
+				}
 			}
 
 			/*Sequence 1*/
@@ -104,9 +123,10 @@ bool AVR_ItemHolder::ItemIn_Implementation(AActor* Actor, class USceneComponent*
 			HoldingItemVisible(HoldedWithVisible);
 
 			/*Sequence 2*/
-			if (CatchableActor)
+			if (bHas_CatchableItem_Interface)
 			{
-				CatchableActor->Catched(Component, this, ItemHolderCollision, "", HoldedWithVisible);
+				//CatchableActor->Catched(Component, this, ItemHolderCollision, "", HoldedWithVisible);
+				IIN_CatchableItem::Execute_Catched(Actor, Component, this, ItemHolderCollision, "", HoldedWithVisible);
 			}
 			return true;
 		}
@@ -129,6 +149,7 @@ bool AVR_ItemHolder::ItemOut_Implementation(AActor* Actor)
 		/*Sequence 0*/
 		HoldingItemVisible(true);
 		IIN_CatchableItem* CatchableActor = Cast<IIN_CatchableItem>(Actor);
+		
 		if (CatchableActor)
 		{
 			CatchableActor->Dropped(this);
