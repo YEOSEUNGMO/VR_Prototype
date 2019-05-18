@@ -153,16 +153,11 @@ UPrimitiveComponent* AVR_MotionController::GetComponentNearHand() const
 
 	for (UPrimitiveComponent* Components : OverlapComponents)
 	{
-		//IIN_CatchableItem* NearActor = Cast<IIN_CatchableItem>(Components->GetOwner());
-		//if (NearActor)
 		if(Components->GetOwner()->GetClass()->ImplementsInterface(UIN_CatchableItem::StaticClass()))
 		{
-			IIN_CatchableItem::Execute_IsCatchableComp(Components->GetOwner(), Components);
-			//NearActor->IsCatchableComp(Components);
 			float MyLength = (Components->GetComponentLocation() - GrabSphereLocation).Size();
-			// float MyLengthSquared = (Actors->GetActorLocation() - GrabSphereLocation).SizeSquared();
 
-			if (MyLength < NearestOverlap)
+			if (IIN_CatchableItem::Execute_IsCatchableComp(Components->GetOwner(), Components) && MyLength < NearestOverlap)
 			{
 				NearestOverlappingComponent = Components;
 				NearestOverlap = MyLength;
@@ -172,8 +167,6 @@ UPrimitiveComponent* AVR_MotionController::GetComponentNearHand() const
 		{
 			GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Yellow, TEXT("Iter_Error"), true, FVector2D(10.0f, 10.0f));
 		}
-		//Epic Comment :D // Filter to Actors that implement our interface for pickup/dropping
-		//bool bHasInterface = NearActor->GetClass()->ImplementsInterface(UIN_CatchableItem::StaticClass());
 
 	}
 
@@ -218,24 +211,41 @@ void  AVR_MotionController::TriggerPull()
 	AActor* Temp=nullptr;
 	
 	TriggerPullActions.Broadcast();
-	if (CatchedComp== nullptr)
+	USceneComponent* NearComponent = GetComponentNearHand();
+	AActor* NearActor = nullptr;
+
+	/*디버그로 확인*/
+	/*if (NearComponent)
+		GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Yellow, NearComponent->GetName(), true, FVector2D(10.0f, 10.0f));*/
+
+	if (NearComponent->IsValidLowLevel())
 	{
-		USceneComponent* NearComponent = GetComponentNearHand();
-		AActor* NearActor = nullptr;
-
-		/*디버그로 확인*/
-		if (NearComponent)
-			GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Yellow, NearComponent->GetName(), true, FVector2D(10.0f, 10.0f));
-
-		if (NearComponent!=nullptr)
+		NearActor = NearComponent->GetOwner();
+		if (CatchedComp == nullptr)//손에 아무 무기를 장착하고 있지 않은 상태.
 		{
-			NearActor = NearComponent->GetOwner();
-			if (ItemIn_Implementation(NearActor, NearComponent)&&DropWhenReleased)
+			if (ItemIn_Implementation(NearActor, NearComponent) && DropWhenReleased)
 			{
+				//GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Yellow, TEXT("ITEM IN!!"), true, FVector2D(10.0f, 10.0f));
 				//TriggerReleaseActions에 바인딩
 				TriggerReleaseActions.AddUObject(this, &AVR_MotionController::ItemDropByTrigger);
 			}
-
+			else
+			{
+				//GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Red, TEXT("ITEM IN ERROR"), true, FVector2D(10.0f, 10.0f));
+			}
+		}
+		else//무기를 장착 하고 있는 상태
+		{
+			bool bHasItemOwnerInterface = NearActor->GetClass()->ImplementsInterface(UIN_ItemOwner::StaticClass());
+			if (bHasItemOwnerInterface)
+			{
+				IIN_ItemOwner::Execute_ItemIn(NearActor, CatchedComp->GetOwner(),CatchedComp);
+				GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Yellow, TEXT("ITEM IN!!"), true, FVector2D(10.0f, 10.0f));
+			}
+			else
+			{
+				GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Red, TEXT("ITEM IN ERROR"), true, FVector2D(10.0f, 10.0f));
+			}
 		}
 	}
 	//UVR_HandAnimInstance* HandAnimation = Cast<UVR_HandAnimInstance>(HandMesh->GetAnimInstance());
@@ -274,8 +284,6 @@ void  AVR_MotionController::GripPush()
 		if (NearComponent != nullptr)
 		{
 			AVR_ItemHolder* ItemHolder =Cast<AVR_ItemHolder>(NearComponent->GetOwner());
-
-
 			ItemHolder->ItemIn_Implementation(CatchedComp->GetOwner(), CatchedComp);
 		}
 	}
@@ -305,25 +313,6 @@ void AVR_MotionController::GripRelease()
 	}
 	if (CatchedComp && CatchedComp->IsValidLowLevel() && !CatchedComp->IsPendingKill())
 	{
-		//// Epic Comment :D // Make sure this hand is still holding the Actor (May have been taken by another hand / event)
-		//if (CatchedComp->GetRootComponent()->GetAttachParent() == MotionController)
-		//{
-		//	if (CatchedComp->GetClass()->ImplementsInterface(UVR_InteractionInterface::StaticClass()))
-		//	{
-		//		IVR_InteractionInterface::Execute_Drop(CatchedComp); // This is the Execute_* function. The asterisk means your function name. :)
-
-		//		RumbleController(0.2f);
-
-		//		// Epic Comment :D // Clear the reference
-		//		CatchedComp = nullptr;
-		//	}
-		//}
-		//else
-		//{
-		//	// Epic Comment :D // Clear the reference
-		//	CatchedComp = nullptr;
-		//}
-
 		CatchedComp = nullptr;
 	}
 }
@@ -461,27 +450,14 @@ bool AVR_MotionController::ItemIn_Implementation(AActor* Actor, class USceneComp
 	if (Actor!=nullptr)
 	{
 		/*Sequence 0*/
-		//IIN_CatchableItem* CatchableActor = Cast<IIN_CatchableItem>(Actor);
 		bool bHasCatchableItemInterface = Actor->GetClass()->ImplementsInterface(UIN_CatchableItem::StaticClass());
 		if (Component != nullptr)
 		{
-			/*if (CatchableActor && Component == CatchableActor->GetBaseCatchingComp())
-			{
-				if (CatchableActor->GetHoldingOwner() != nullptr)
-				{
-					IIN_ItemOwner* ItemOwner = Cast<IIN_ItemOwner>(CatchableActor->GetHoldingOwner());
-					if (ItemOwner)
-					{
-						ItemOwner->ItemOut(Actor);
-					}
-				}
-			}*/
 			if (bHasCatchableItemInterface && Component==IIN_CatchableItem::Execute_GetBaseCatchingComp(Actor))
 			{
 				AActor* HoldingOwner = IIN_CatchableItem::Execute_GetHoldingOwner(Actor);
-				if (HoldingOwner != nullptr)
+				if (HoldingOwner->IsValidLowLevel())
 				{
-
 					bool bHasItemOwnerInterface = HoldingOwner->GetClass()->ImplementsInterface(UIN_ItemOwner::StaticClass());
 					if (bHasItemOwnerInterface)
 					{
@@ -490,30 +466,18 @@ bool AVR_MotionController::ItemIn_Implementation(AActor* Actor, class USceneComp
 				}
 			}
 		}
-
+		else
+		{
+			GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Black, TEXT("interf error"), true, FVector2D(10.0f, 10.0f));
+		}
 		/*Sequence 1*/
 		if (bHasCatchableItemInterface)
 		{
 			USceneComponent* RealCatchedComp;
-			/*RealCatchedComp = CatchableActor->Catched(Component, this, AttachingPoint, "", true);
-			if (RealCatchedComp->IsValidLowLevel())
-			{
-				CatchableActor = Cast<IIN_CatchableItem>(RealCatchedComp->GetOwner());
-				if (CatchableActor)
-				{
-					DropWhenReleased = CatchableActor->IsDroppedWhenRelease(RealCatchedComp);
-					CatchedComp = RealCatchedComp;
-					StartRumbleController(0.7, false);
-					return true;
-				}
-				else
-				{
-					return false;
-				}
-			}*/
 			RealCatchedComp = IIN_CatchableItem::Execute_Catched(Actor, Component, this, AttachingPoint, "", true);
 			if (RealCatchedComp->IsValidLowLevel())
 			{
+				GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Black, RealCatchedComp->GetName(), true, FVector2D(10.0f, 10.0f));
 				bHasCatchableItemInterface = RealCatchedComp->GetOwner()->GetClass()->ImplementsInterface(UIN_CatchableItem::StaticClass());
 				if (bHasCatchableItemInterface)
 				{
@@ -527,6 +491,10 @@ bool AVR_MotionController::ItemIn_Implementation(AActor* Actor, class USceneComp
 					return false;
 				}
 			}
+			else
+			{
+				//GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Black, TEXT("catched error"), true, FVector2D(10.0f, 10.0f));
+			}
 		}
 	}
 
@@ -536,16 +504,8 @@ bool AVR_MotionController::ItemIn_Implementation(AActor* Actor, class USceneComp
 
 bool AVR_MotionController::ItemOut_Implementation(AActor* Actor)
 {
-
 	if (CatchedComp->GetOwner() == Actor&& CatchedComp !=nullptr)
 	{
-		/*IIN_CatchableItem* CatchableActor = Cast<IIN_CatchableItem>(CatchedComp->GetOwner());
-		if (CatchableActor)
-		{
-			CatchableActor->Dropped(this);
-			CatchedComp = nullptr;
-			return true;
-		}*/
 
 		bool bHasCatchableItemInterface = CatchedComp->GetOwner()->GetClass()->ImplementsInterface(UIN_CatchableItem::StaticClass());
 		if (bHasCatchableItemInterface)

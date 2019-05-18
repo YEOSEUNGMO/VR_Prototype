@@ -15,7 +15,7 @@ DECLARE_MULTICAST_DELEGATE_OneParam(TickEventDelegate,float);
 DECLARE_MULTICAST_DELEGATE(MagazineAttacheDelegate);
 
 UCLASS()
-class VR_PROTOTYPE_API AVR_Rifle : public AActor, public IIN_ItemOwner, public IIN_CatchableItem,public IIN_ButtonUsableItem
+class VR_PROTOTYPE_API AVR_Rifle : public AActor, public IIN_CatchableItem,public IIN_ButtonUsableItem
 {
 	GENERATED_BODY()
 
@@ -32,8 +32,8 @@ class VR_PROTOTYPE_API AVR_Rifle : public AActor, public IIN_ItemOwner, public I
 		class USceneComponent* MainHandLocation;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
 		class UBoxComponent* SubHandBox;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
-		class UBoxComponent* MagazineBox;
+	//UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
+	//	class UBoxComponent* MagazineBox;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
 		class USceneComponent* SubHandLocation;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
@@ -42,11 +42,8 @@ class VR_PROTOTYPE_API AVR_Rifle : public AActor, public IIN_ItemOwner, public I
 		class UBoxComponent* ReLoadTarget;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
 		class USceneComponent* TargetMark;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "RifleMagazine", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
 		class UStaticMeshComponent* TargetMarkImg;
-
-	//UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
-	//	bool ReloadState;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
 		class UVR_RifleAnimInstance* RifleAnim;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
@@ -61,10 +58,10 @@ class VR_PROTOTYPE_API AVR_Rifle : public AActor, public IIN_ItemOwner, public I
 		FRotator HandRotDiff;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
 		AActor* HoldingOwner;
+	/*UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
+		class AVR_RifleMagazine* AttachedMagazine;*/
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
-		class AVR_RifleMagazine* AttachedMagazine;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
-		bool IsReadyToFire; //IsReadyToShot
+		bool IsReadyToShot;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
 		bool IsRecharging;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
@@ -82,8 +79,6 @@ public:
 		class USceneComponent* ProjSpawn;
 
 	UFUNCTION(BlueprintCallable, Category = "Rifle")
-		void OnFire();
-	UFUNCTION(BlueprintCallable, Category = "Rifle")
 		void ReloadTrackerTracing(float time);
 	UFUNCTION(BlueprintCallable, Category = "Rifle")
 		void setMainHand(AVR_MotionController* val);
@@ -95,8 +90,12 @@ public:
 		void ClassifyState(float DeltaTime);
 	UFUNCTION(BlueprintCallable, Category = "Rifle")
 		void TargetMarkMatching(float DeltaTime);
-		UFUNCTION(BlueprintCallable, Category = "Rifle")
+	UFUNCTION(BlueprintCallable, Category = "Rifle")
 		void TriggerPulled();
+	UFUNCTION(BlueprintCallable, Category = "Rifle")
+		void TryShot();
+	UFUNCTION(BlueprintCallable, Category = "Rifle")
+		void Shot();
 	UFUNCTION(BlueprintCallable, Category = "Rifle")
 		void TriggerReleased();
 	UFUNCTION()
@@ -127,13 +126,14 @@ public:
 	MagazineAttacheDelegate MagazineAttacheEvenet;
 	FDelegateHandle MagazineAttacheEvenetHandle; 
 	virtual AActor* Dropped_Implementation(AActor* OldOwner);
-	virtual bool ItemIn_Implementation(AActor* Actor, class USceneComponent* Component);
-	virtual bool ItemOut_Implementation(AActor* Actor);
 	virtual USceneComponent* Catched_Implementation(class USceneComponent* ItemComponent, AActor* Owner, class USceneComponent* OwnerComponent, FName SocketName, bool HoldedWithVisible);
 	virtual USceneComponent* GetBaseCatchingComp_Implementation();
 	virtual AActor* GetHoldingOwner_Implementation();
 	virtual bool SetHoldingOwner_Implementation(AActor* Owner);
 	virtual bool IsDroppedWhenRelease_Implementation(USceneComponent* targetComp);
 	virtual bool IsCatchableComp_Implementation(USceneComponent* SelectedComponent);
-	virtual void BottomButton_Implementation(bool T_Dwon_F_Up);
+
+	//virtual void BottomButton_Implementation(bool T_Dwon_F_Up);
+	//virtual bool ItemIn_Implementation(AActor* Actor, class USceneComponent* Component);
+	//virtual bool ItemOut_Implementation(AActor* Actor);
 };

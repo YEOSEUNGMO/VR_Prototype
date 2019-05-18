@@ -63,9 +63,15 @@ public:
 		void SetItemHolded(float val);
 	UFUNCTION(BlueprintCallable, Category = "ItemHoler")
 		void SetItemRegenTime(float val);
-
+	/*UFUNCTION(BlueprintCallable, Category = "ItemHoler")
+		TArray<AActor> GetAllAttahcedActors(AActor* RootActor);*/
 	virtual bool ItemIn_Implementation(AActor* Actor, class USceneComponent* Component);
 	virtual bool ItemOut_Implementation(AActor* Actor);
 	virtual USceneComponent* Catched_Implementation(class USceneComponent* ItemComponent, AActor* Owner, class USceneComponent* OwnerComponent, FName SocketName, bool HoldedWithVisible);
 	virtual USceneComponent* GetBaseCatchingComp_Implementation();
+	virtual AActor* Dropped_Implementation(AActor* OldOwner);
+	virtual AActor* GetHoldingOwner_Implementation();
+	virtual bool SetHoldingOwner_Implementation(AActor* Owner);
+	virtual bool IsDroppedWhenRelease_Implementation(USceneComponent* targetComp);
+	virtual bool IsCatchableComp_Implementation(USceneComponent* SelectedComponent);
 };

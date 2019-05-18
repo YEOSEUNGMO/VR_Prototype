@@ -29,7 +29,7 @@ AVR_Rifle::AVR_Rifle()
 	PrimaryActorTick.bCanEverTick = true;
 
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SK_Rifle(TEXT("SkeletalMesh'/Game/Graphics/Rifle/Rifle.Rifle'"));
-
+	static ConstructorHelpers::FObjectFinder<UClass> AnimBP_RifleAnimation(TEXT("AnimBlueprint'/Game/Graphics/Rifle/RifleBP.RifleBP_C'"));
 	RootScene = CreateDefaultSubobject<USceneComponent>(TEXT("RootScene"));
 	RootComponent = RootScene;
 
@@ -39,13 +39,23 @@ AVR_Rifle::AVR_Rifle()
 	RifleMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	//RifleMesh->SetRelativeLocation(FVector(20.0f, 00.0f, 0.0f));
 	RifleMesh->SetRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
-	RifleMesh->SetRelativeScale3D(FVector(0.8f, 0.8f, 0.8f));
+	RifleMesh->SetRelativeScale3D(FVector(1.0f, 1.0f, 1.0f));
 	RifleMesh->SetCollisionProfileName(TEXT("NoCollision"));
 	RifleMesh->CastShadow = false;
 
 	if (SK_Rifle.Succeeded())
 	{
 		RifleMesh->SetSkeletalMesh(SK_Rifle.Object);
+		RifleMesh->SetAnimationMode(EAnimationMode::AnimationBlueprint);
+		if (AnimBP_RifleAnimation.Succeeded())
+		{
+			RifleMesh->SetAnimInstanceClass(AnimBP_RifleAnimation.Object);
+			UVR_RifleAnimInstance* RifleAnim = Cast<UVR_RifleAnimInstance>(RifleMesh->GetAnimInstance());
+			if (RifleAnim->IsValidLowLevel())
+			{
+				RifleAnim->setRifle(this);
+			}
+		}
 	}
 
 	MainHandBox = CreateDefaultSubobject<UBoxComponent>("MainHandBox");
@@ -60,11 +70,11 @@ AVR_Rifle::AVR_Rifle()
 	SubHandLocation = CreateDefaultSubobject<USceneComponent>("SubHandLocation");
 	SubHandLocation->SetupAttachment(RifleMesh);
 
-	MagazineBox = CreateDefaultSubobject<UBoxComponent>("MagazineBox");
+	/*MagazineBox = CreateDefaultSubobject<UBoxComponent>("MagazineBox");
 	MagazineBox->SetCollisionProfileName(TEXT("OverlapAllDynamic"));
 	MagazineBox->SetGenerateOverlapEvents(true);
 	MagazineBox->OnComponentBeginOverlap.AddDynamic(this, &AVR_Rifle::OnComponentBeginOverlap);
-	MagazineBox->SetupAttachment(RifleMesh);
+	MagazineBox->SetupAttachment(RifleMesh);*/
 
 	ProjectileClass = AVR_Projectile::StaticClass();
 
@@ -79,7 +89,7 @@ AVR_Rifle::AVR_Rifle()
 	ReLoadTracker->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
 	ReLoadTracker->SetRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
 	ReLoadTracker->SetRelativeScale3D(FVector(0.1f, 0.1f, 0.1f));
-	//ReLoadTracker->OnComponentBeginOverlap.AddDynamic(this,&AVR_Rifle::OnBeginOverlap);
+	ReLoadTracker->OnComponentBeginOverlap.AddDynamic(this,&AVR_Rifle::OnComponentBeginOverlap);
 	ReLoadTracker->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 
 	ReLoadTarget = CreateDefaultSubobject<UBoxComponent>(TEXT("ReloadTarget"));
@@ -94,10 +104,11 @@ AVR_Rifle::AVR_Rifle()
 	TargetMarkImg = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ReloadTargetImg"));
 	TargetMarkImg->SetupAttachment(TargetMark);
 
-	IsReadyToFire = false;
+	IsReadyToShot = false;
 	IsRecharging = false;
 	BottomButtonPressed = false;
 	GripState = ERifleGripState::NoGrip;
+	HoldingOwner = nullptr;
 }
 
 // Called when the game starts or when spawned
@@ -115,8 +126,9 @@ void AVR_Rifle::BeginPlay()
 	HandRotDiff = UKismetMathLibrary::MakeRotFromX(SubHandRelativeLocation - MainHandRelativeLocation);
 	TickEventHandle = TickEvent.AddUObject(this, &AVR_Rifle::TargetMarkMatching);
 
-	const FTransform SpawnTransform = FTransform(FRotator(0.0f, 0.0f, 0.0f), FVector(0.0f, 0.0f, 0.0f), FVector(1.0f, 1.0f, 1.0f));
-	AVR_RifleMagazine* Magazine = GetWorld()->SpawnActorDeferred<AVR_RifleMagazine>(AVR_RifleMagazine::StaticClass(), SpawnTransform, this, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);//라이플 스폰
+	///*Then 2*/
+	//const FTransform SpawnTransform = FTransform(FRotator(0.0f, 0.0f, 0.0f), FVector(0.0f, 0.0f, 0.0f), FVector(1.0f, 1.0f, 1.0f));
+	//AVR_RifleMagazine* Magazine = GetWorld()->SpawnActorDeferred<AVR_RifleMagazine>(AVR_RifleMagazine::StaticClass(), SpawnTransform, this, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);//탄창
 
 }
 
@@ -126,13 +138,6 @@ void AVR_Rifle::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	
 	TickEvent.Broadcast(DeltaTime);
-
-	
-}
-
-void AVR_Rifle::OnFire()
-{
-	
 }
 
 void AVR_Rifle::ReloadTrackerTracing(float time)
@@ -193,7 +198,7 @@ void AVR_Rifle::ClassifyState(float DeltaTime)
 
 void AVR_Rifle::TargetMarkMatching(float DeltaTime)
 {
-	if (MainHand != nullptr && IsReadyToFire)
+	if (MainHand != nullptr && IsReadyToShot)
 	{
 		/*Then 0*/
 		if (!TargetMark->bVisible)
@@ -284,77 +289,82 @@ AActor* AVR_Rifle::Dropped_Implementation(AActor* OldOwner)
 		}
 	}
 }
-bool AVR_Rifle::ItemIn_Implementation(AActor* Actor, class USceneComponent* Component)
-{
-	AVR_RifleMagazine* magazine = Cast<AVR_RifleMagazine>(Actor);
-	if (magazine->GetBulletCount() > 0)
-	{
-		/*Then 0*/
-		if (Component->IsValidLowLevel())
-		{
-			IIN_CatchableItem* CatchableItem = Cast<IIN_CatchableItem>(Actor);
-			if (CatchableItem)
-			{
-				if (Component == CatchableItem->GetBaseCatchingComp())
-				{
-					if (CatchableItem->GetHoldingOwner()->IsValidLowLevel())
-					{
-						IIN_ItemOwner* ItemOwner = Cast<IIN_ItemOwner>(CatchableItem->GetHoldingOwner());
-						ItemOwner->ItemOut(Actor);
-					}
-				}
-			}
-		}
+//bool AVR_Rifle::ItemIn_Implementation(AActor* Actor, class USceneComponent* Component)
+//{
+//	AVR_RifleMagazine* magazine = Cast<AVR_RifleMagazine>(Actor);
+//	if (magazine->GetBulletCount() > 0)
+//	{
+//		/*Then 0*/
+//		if (Component->IsValidLowLevel())
+//		{
+//			bool bHas_CatchableItem_Interface = Actor->GetClass()->ImplementsInterface(UIN_CatchableItem::StaticClass());
+//			if (bHas_CatchableItem_Interface)
+//			{
+//				if (Component == IIN_CatchableItem::Execute_GetBaseCatchingComp(Actor))
+//				{
+//					if (IIN_CatchableItem::Execute_GetHoldingOwner(Actor)->IsValidLowLevel())
+//					{
+//						bool bHasItemOwnerInterface = HoldingOwner->GetClass()->ImplementsInterface(UIN_ItemOwner::StaticClass());
+//						if (bHasItemOwnerInterface)
+//						{
+//							IIN_ItemOwner::Execute_ItemOut(HoldingOwner, Actor);
+//						}
+//					}
+//				}
+//			}
+//		}
+//
+//		/*Then 1*/
+//		AttachedMagazine = magazine;
+//		AttachedMagazine->Catched_Implementation(AttachedMagazine->GetStaticMesh(), this, RifleMesh,"",false);
+//		
+//		/*Then 2*/
+//		MagazineAttacheEvenet.Broadcast();
+//		return true;
+//	}
+//	else
+//	{
+//		return false;
+//	}
+//}
+//
+//bool AVR_Rifle::ItemOut_Implementation(AActor* Actor)
+//{
+//	if (!IsRecharging)
+//	{
+//		if (AttachedMagazine != nullptr&&AttachedMagazine == Actor)
+//		{
+//			bool bHas_CatchableItem_Interface = Actor->GetClass()->ImplementsInterface(UIN_CatchableItem::StaticClass());
+//			if (bHas_CatchableItem_Interface)
+//			{
+//				if (IIN_CatchableItem::Execute_Dropped(Actor, this) == nullptr)
+//				{
+//					AttachedMagazine = nullptr;
+//					return true;
+//				}
+//				else
+//				{
+//					return false;
+//				}
+//			}
+//		}
+//		else
+//		{
+//			return false;
+//		}
+//	}
+//
+//	//임시 리턴
+//	return false;
+//}
 
-		/*Then 1*/
-		AttachedMagazine = magazine;
-		AttachedMagazine->Catched_Implementation(AttachedMagazine->GetStaticMesh(), this, RifleMesh,"",false);
-		
-		/*Then 2*/
-		MagazineAttacheEvenet.Broadcast();
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
-
-bool AVR_Rifle::ItemOut_Implementation(AActor* Actor)
-{
-	if (!IsRecharging)
-	{
-		if (AttachedMagazine != nullptr&&AttachedMagazine == Actor)
-		{
-			IIN_CatchableItem* CatchableActor = Cast<IIN_CatchableItem>(AttachedMagazine);
-			if (CatchableActor)
-			{
-				if (CatchableActor->Dropped_Implementation(this) == nullptr)
-				{
-					AttachedMagazine = nullptr;
-					return true;
-				}
-				else
-				{
-					return false;
-				}
-			}
-		}
-		else
-		{
-			return false;
-		}
-	}
-
-	//임시 리턴
-	return false;
-}
 USceneComponent* AVR_Rifle::Catched_Implementation(USceneComponent* ItemComponent, AActor* Owner, USceneComponent* OwnerComponent, FName SocketName, bool HoldedWithVisible)
 {
 	FAttachmentTransformRules AttachRules(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::KeepWorld, true);
 	AVR_MotionController* MotionController = Cast< AVR_MotionController>(Owner);
 
-	if (MotionController != nullptr) {
+	if (MotionController != nullptr) 
+	{
 		if (MainHand == nullptr && SubHand == nullptr)
 		{
 			MainHand = MotionController;
@@ -492,6 +502,19 @@ bool AVR_Rifle::IsCatchableComp_Implementation(USceneComponent* SelectedComponen
 
 void AVR_Rifle::TriggerPulled()
 {
+	TryShot();
+}
+
+void AVR_Rifle::TryShot()
+{
+	if (IsReadyToShot)
+	{
+
+	}
+}
+
+void AVR_Rifle::Shot()
+{
 
 }
 
@@ -502,24 +525,24 @@ void AVR_Rifle::TriggerReleased()
 
 void AVR_Rifle::OnComponentBeginOverlap(class UPrimitiveComponent* OverlappedComp, AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (AttachedMagazine == nullptr && !BottomButtonPressed)
+	/*if (AttachedMagazine == nullptr && !BottomButtonPressed)
 	{
 		AVR_RifleMagazine* magazine = Cast<AVR_RifleMagazine>(OtherActor);
 		if (magazine->IsCatchableComp_Implementation(OtherComp))
 		{
 			ItemIn_Implementation(magazine, OtherComp);
 		}
-	}
+	}*/
 }
-
-void AVR_Rifle::BottomButton_Implementation(bool T_Dwon_F_Up)
-{
-	BottomButtonPressed = T_Dwon_F_Up;
-	if (BottomButtonPressed)
-	{
-		ItemOut_Implementation(AttachedMagazine);
-	}
-}
+//
+//void AVR_Rifle::BottomButton_Implementation(bool T_Dwon_F_Up)
+//{
+//	BottomButtonPressed = T_Dwon_F_Up;
+//	if (BottomButtonPressed)
+//	{
+//		ItemOut_Implementation(AttachedMagazine);
+//	}
+//}
 
 void AVR_Rifle::SetGripState(ERifleGripState state)
 {
