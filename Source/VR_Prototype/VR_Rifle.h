@@ -37,9 +37,15 @@ class VR_PROTOTYPE_API AVR_Rifle : public AActor, public IIN_CatchableItem,publi
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
 		class USceneComponent* SubHandLocation;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
-		class USphereComponent* ReLoadTracker;
+		class USphereComponent* ReloadTracker;//ReloadingTracker
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
-		class UBoxComponent* ReLoadTarget;
+		class USceneComponent* ReloadTargets; //ReChargeTargets
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
+		class UBoxComponent* ReloadTarget1; //ReChargeTarget1
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
+		class UBoxComponent* ReloadTarget2; //ReChargeTarget2
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
+		class UBoxComponent* TrakcerBound; //TrackerBound
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
 		class USceneComponent* TargetMark;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
@@ -63,7 +69,7 @@ class VR_PROTOTYPE_API AVR_Rifle : public AActor, public IIN_CatchableItem,publi
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
 		bool IsReadyToShot;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
-		bool IsRecharging;
+		bool IsReloading;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
 		bool BottomButtonPressed;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
@@ -89,6 +95,20 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Rifle")
 		void ClassifyState(float DeltaTime);
 	UFUNCTION(BlueprintCallable, Category = "Rifle")
+		void Tracker_Initialize();
+	UFUNCTION(BlueprintCallable, Category = "Rifle")
+		void MaindHand_CheckStart();
+	UFUNCTION(BlueprintCallable, Category = "Rifle")
+		void MaindHand_CheckFinish();
+	UFUNCTION(BlueprintCallable, Category = "Rifle")
+		void OneHand_Checking(float DeltaTime);
+	UFUNCTION(BlueprintCallable, Category = "Rifle")
+		void OneHandReloadTriggerSet();
+	UFUNCTION(BlueprintCallable, Category = "Rifle")
+		void OneHandReloadingTriggerRemove();
+	UFUNCTION(BlueprintCallable, Category = "Rifle")
+		void StartOneHandReloading();
+	UFUNCTION(BlueprintCallable, Category = "Rifle")
 		void TargetMarkMatching(float DeltaTime);
 	UFUNCTION(BlueprintCallable, Category = "Rifle")
 		void TriggerPulled();
@@ -98,9 +118,8 @@ public:
 		void Shot();
 	UFUNCTION(BlueprintCallable, Category = "Rifle")
 		void TriggerReleased();
-	UFUNCTION()
-		void OnComponentBeginOverlap(class UPrimitiveComponent* OverlappedComp, AActor* OtherActor, 
-			class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	void OnComponentBeginOverlap(class UPrimitiveComponent* OverlappedComp, AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	void OnComponentEndOverlap(class UPrimitiveComponent* OverlappedComp, AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 	UFUNCTION(BlueprintCallable, Category = "Rifle")
 		void SetGripState(ERifleGripState state);
 	UFUNCTION(BlueprintCallable, Category = "Rifle")
@@ -122,7 +141,11 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	TickEventDelegate TickEvent;
-	FDelegateHandle TickEventHandle;
+	FDelegateHandle TickEventHandle_LateUpdate;
+	FDelegateHandle TickEventHandle_SetTriggerPosition;
+	FDelegateHandle TickEventHandle_ClassifyState;
+	FDelegateHandle TickEventHandle_TargetMarkMatching;
+	FDelegateHandle TickEventHandle_OneHand_Checking;
 	MagazineAttacheDelegate MagazineAttacheEvenet;
 	FDelegateHandle MagazineAttacheEvenetHandle; 
 	virtual AActor* Dropped_Implementation(AActor* OldOwner);

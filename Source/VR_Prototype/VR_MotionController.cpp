@@ -575,6 +575,12 @@ USkeletalMeshComponent* AVR_MotionController::GetHandMesh()
 	return HandMesh;
 }
 
+USphereComponent* AVR_MotionController::GetGrabSphere()
+{
+	return GrabSphere;
+}
+
+
 void AVR_MotionController::ThumbBottom(bool T_Down_F_Up)
 {
 	if (CatchedComp != nullptr)

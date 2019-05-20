@@ -23,9 +23,9 @@ class VR_PROTOTYPE_API UVR_RifleAnimInstance : public UAnimInstance
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "RifleAnim", meta = (AllowPrivateAccess = "true"))
 		bool HammerWillBePushed;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "RifleAnim", meta = (AllowPrivateAccess = "true"))
-		bool useOneHandRecharging;
+		bool useOneHandReloading;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "RifleAnim", meta = (AllowPrivateAccess = "true"))
-		bool useTwoHandRecharging;
+		bool useTwoHandReloading;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "RifleAnim", meta = (AllowPrivateAccess = "true"))
 		bool ReturnTonormal;
 public:
@@ -35,5 +35,8 @@ public:
 		void setRifle(class AVR_Rifle* val);
 	UFUNCTION(BlueprintCallable, Category = "RifleAnim")
 		void setTriggerPulled(float val);
-	
+	UFUNCTION(BlueprintCallable, Category = "RifleAnim")
+		void setuseOneHandReloading(bool val);
+	UFUNCTION(BlueprintCallable, Category = "RifleAnim")
+		void setuseTwoHandReloading(bool val);
 };

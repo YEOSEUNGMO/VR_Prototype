@@ -36,5 +36,5 @@ enum class ERifleFire_Code : uint8
 {
 	None,
 	Fire,
-	Recharge
+	Reloade
 };

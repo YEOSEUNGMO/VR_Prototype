@@ -6,7 +6,7 @@
 UVR_HandAnimInstance::UVR_HandAnimInstance()
 {
 	//GripValue = 0;
-	RifleGraped = false;
+	RifleGrabed = false;
 	CurrentGripState = EGrip_Code::Open;
 	CurrentRifleGripState = ERifleGripState::NoGrip;
 	//CurrentWeaponState = EWeaponState_Code::Idle;
@@ -20,6 +20,26 @@ UVR_HandAnimInstance::UVR_HandAnimInstance()
 void UVR_HandAnimInstance::SetGripState(EGrip_Code GripState)
 {
 	CurrentGripState = GripState;
+}
+
+void UVR_HandAnimInstance::setuseOneHandReload(bool val)
+{
+	useOneHandReload = val;
+}
+
+void UVR_HandAnimInstance::setuseTwoHandReload(bool val)
+{
+	useTwoHandReload = val;
+}
+
+void UVR_HandAnimInstance::setRifleGrabed(bool val)
+{
+	RifleGrabed = val;
+}
+
+void UVR_HandAnimInstance::setRifleSubGrabed(bool val)
+{
+	RifleSubGrabed = val;
 }
 
 //void UVR_HandAnimInstance::SetWeaponState(EWeaponState_Code val)

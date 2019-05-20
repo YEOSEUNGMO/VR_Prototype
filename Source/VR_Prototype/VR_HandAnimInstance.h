@@ -17,16 +17,24 @@ class VR_PROTOTYPE_API UVR_HandAnimInstance : public UAnimInstance
 
 	UVR_HandAnimInstance();
 
-public:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HandAnimation")
-		bool RifleGraped;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HandAnimation")
-		bool RifleSubGraped;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HandAnimation")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HandAnimation", meta = (AllowPrivateAccess = "true"))
+		bool RifleGrabed;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HandAnimation", meta = (AllowPrivateAccess = "true"))
+		bool RifleSubGrabed;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HandAnimation", meta = (AllowPrivateAccess = "true"))
 		ERifleGripState CurrentRifleGripState;
-	//	EWeaponState_Code CurrentWeaponState;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HandAnimation")
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HandAnimation", meta = (AllowPrivateAccess = "true"))
 		EGrip_Code CurrentGripState;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HandAnimation", meta = (AllowPrivateAccess = "true"))
+		bool useOneHandReload;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HandAnimation", meta = (AllowPrivateAccess = "true"))
+		bool useTwoHandReload;
+public:
 
 	//UFUNCTION(BlueprintCallable, Category = "VRTemplate|Teleportation")
 	//	void SetGripState(float val);
@@ -39,6 +47,18 @@ public:
 	//	void SetRifleGraped(bool val);
 	//UFUNCTION(BlueprintCallable, Category = "HandAnimation")
 	//	void SetRifleSubGraped(bool val);
+
+	UFUNCTION(BlueprintCallable, Category = "MotionController")
+		void setuseOneHandReload(bool val);
+
+	UFUNCTION(BlueprintCallable, Category = "MotionController")
+		void setuseTwoHandReload(bool val);
+
+	UFUNCTION(BlueprintCallable, Category = "MotionController")
+		void setRifleGrabed(bool val);
+
+	UFUNCTION(BlueprintCallable, Category = "MotionController")
+		void setRifleSubGrabed(bool val);
 private:
 
 	//UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HandAnim", meta = (AllowPrivateAccess = "true"))

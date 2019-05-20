@@ -107,6 +107,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "MotionController")
 		class USkeletalMeshComponent* GetHandMesh();
 
+	UFUNCTION(BlueprintCallable, Category = "MotionController")
+		class USphereComponent* GetGrabSphere();
+
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "VRTemplate|Variables", meta = (AllowPrivateAccess = "true"))
 		EGrip_Code CurrentGripState;

@@ -31,9 +31,7 @@ void AVR_RifleHolder::makeItem()
 {
 	AActor* spawnActor;
 	const FTransform SpawnTransform = FTransform(FRotator(0.0f, 0.0f, 0.0f), FVector(0.0f, 0.0f, 0.0f), FVector(1.0f, 1.0f, 1.0f)); // = FTransform::Identity;
-	FAttachmentTransformRules AttachRules(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::KeepWorld, false);
-	FActorSpawnParameters parameter;
-	parameter.Owner = this;
+	//FAttachmentTransformRules AttachRules(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::KeepWorld, false);
 	
 	spawnActor = GetWorld()->SpawnActorDeferred<AVR_Rifle>(AVR_Rifle::StaticClass(), SpawnTransform, this, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
 	if (spawnActor)

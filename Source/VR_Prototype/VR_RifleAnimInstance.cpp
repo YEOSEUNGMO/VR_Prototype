@@ -10,8 +10,8 @@ UVR_RifleAnimInstance::UVR_RifleAnimInstance()
 	TriggerPulled = 0.0f;
 	HammerPulled = 1.0f;
 	HammerWillBePushed = false;
-	useOneHandRecharging = false;
-	useTwoHandRecharging = false;
+	useOneHandReloading = false;
+	useTwoHandReloading = false;
 }
 
 void UVR_RifleAnimInstance::NativeUpdateAnimation(float DeltaTime)
@@ -47,4 +47,14 @@ void UVR_RifleAnimInstance::setRifle(AVR_Rifle* val)
 void UVR_RifleAnimInstance::setTriggerPulled(float val)
 {
 	TriggerPulled = val;
+}
+
+void UVR_RifleAnimInstance::setuseOneHandReloading(bool val)
+{
+	useOneHandReloading = val;
+}
+
+void UVR_RifleAnimInstance::setuseTwoHandReloading(bool val)
+{
+	useTwoHandReloading = val;
 }
