@@ -42,6 +42,10 @@ void UVR_HandAnimInstance::setRifleSubGrabed(bool val)
 	RifleSubGrabed = val;
 }
 
+void UVR_HandAnimInstance::setReturnToMain(bool val)
+{
+	ReturnToMain = val;
+}
 //void UVR_HandAnimInstance::SetWeaponState(EWeaponState_Code val)
 //{
 //	CurrentWeaponState = val;

@@ -74,6 +74,8 @@ class VR_PROTOTYPE_API AVR_Rifle : public AActor, public IIN_CatchableItem,publi
 		bool BottomButtonPressed;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
 		ERifleGripState GripState;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
+		int Overload_Limit = 4;//과부하 한계
 public:
 	// Sets default values for this actor's properties
 	AVR_Rifle();
@@ -103,11 +105,17 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Rifle")
 		void OneHand_Checking(float DeltaTime);
 	UFUNCTION(BlueprintCallable, Category = "Rifle")
+		void AfterOneHandShot();
+	UFUNCTION(BlueprintCallable, Category = "Rifle")
 		void OneHandReloadTriggerSet();
 	UFUNCTION(BlueprintCallable, Category = "Rifle")
 		void OneHandReloadingTriggerRemove();
 	UFUNCTION(BlueprintCallable, Category = "Rifle")
 		void StartOneHandReloading();
+	UFUNCTION(BlueprintCallable, Category = "Rifle")
+		void AfterTwoHandShot();
+	UFUNCTION(BlueprintCallable, Category = "Rifle")
+		void Reloaded();
 	UFUNCTION(BlueprintCallable, Category = "Rifle")
 		void TargetMarkMatching(float DeltaTime);
 	UFUNCTION(BlueprintCallable, Category = "Rifle")

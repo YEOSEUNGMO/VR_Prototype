@@ -260,6 +260,11 @@ void AVR_Rifle::ReloadTrackerTracing(float time)
 	}
 }
 
+void AVR_Rifle::AfterOneHandShot()
+{
+	OneHandReloadTriggerSet();
+}
+
 void AVR_Rifle::OneHandReloadTriggerSet()
 {
 	MaindHand_CheckStart();
@@ -302,6 +307,29 @@ void AVR_Rifle::StartOneHandReloading()
 	Hand_Anim->setuseOneHandReload(true);
 }
 
+void AVR_Rifle::AfterTwoHandShot()
+{
+	IsReloading = true;
+	RifleAnim->setuseTwoHandReloading(true);
+	UVR_HandAnimInstance* Hand_Anim = Cast<UVR_HandAnimInstance>(MainHand->GetHandMesh()->GetAnimInstance());
+	Hand_Anim->setuseTwoHandReload(true);
+}
+
+void AVR_Rifle::Reloaded()
+{
+	/*Then 0*/
+	IsReadyToShot = true;
+
+	/*Then 1*/
+	if (MainHand->IsValidLowLevel())
+	{
+		UVR_HandAnimInstance* Hand_Anim = Cast<UVR_HandAnimInstance>(MainHand->GetHandMesh()->GetAnimInstance());
+		Hand_Anim->setReturnToMain(true);
+	}
+
+	/*Then 2*/
+	IsReloading = false;
+}
 
 void AVR_Rifle::TargetMarkMatching(float DeltaTime)
 {
@@ -632,7 +660,14 @@ void AVR_Rifle::Shot()
 
 	/*Then 1*/
 	IsReadyToShot = false;
-
+	if (!SubHand->IsValidLowLevel())
+	{
+		AfterOneHandShot();
+	}
+	else
+	{
+		AfterTwoHandShot();
+	}
 	/*Then 2*/
 	if (GetAttachParentActor()->IsValidLowLevel())
 	{

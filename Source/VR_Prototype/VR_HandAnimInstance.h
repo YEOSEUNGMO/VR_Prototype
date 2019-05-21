@@ -34,6 +34,9 @@ class VR_PROTOTYPE_API UVR_HandAnimInstance : public UAnimInstance
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HandAnimation", meta = (AllowPrivateAccess = "true"))
 		bool useTwoHandReload;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HandAnimation", meta = (AllowPrivateAccess = "true"))
+		bool ReturnToMain;
 public:
 
 	//UFUNCTION(BlueprintCallable, Category = "VRTemplate|Teleportation")
@@ -59,6 +62,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "MotionController")
 		void setRifleSubGrabed(bool val);
+
+	UFUNCTION(BlueprintCallable, Category = "MotionController")
+		void setReturnToMain(bool val);
+	
 private:
 
 	//UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HandAnim", meta = (AllowPrivateAccess = "true"))
