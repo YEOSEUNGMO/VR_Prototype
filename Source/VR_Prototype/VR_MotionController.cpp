@@ -225,13 +225,14 @@ void  AVR_MotionController::TriggerPull()
 		{
 			if (ItemIn_Implementation(NearActor, NearComponent) && DropWhenReleased)
 			{
+				HandAnimation->setCurrentRifleGripState(ERifleGripState::MainGrip);
 				//GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Yellow, TEXT("ITEM IN!!"), true, FVector2D(10.0f, 10.0f));
 				//TriggerReleaseActions에 바인딩
 				TriggerReleaseActions.AddUObject(this, &AVR_MotionController::ItemDropByTrigger);
 			}
 			else
 			{
-				//GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Red, TEXT("ITEM IN ERROR"), true, FVector2D(10.0f, 10.0f));
+				GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Red, TEXT("ITEM IN ERROR"), true, FVector2D(10.0f, 10.0f));
 			}
 		}
 		else//무기를 장착 하고 있는 상태
@@ -240,7 +241,7 @@ void  AVR_MotionController::TriggerPull()
 			if (bHasItemOwnerInterface)
 			{
 				IIN_ItemOwner::Execute_ItemIn(NearActor, CatchedComp->GetOwner(),CatchedComp);
-				GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Yellow, TEXT("ITEM IN!!"), true, FVector2D(10.0f, 10.0f));
+				HandAnimation->setCurrentRifleGripState(ERifleGripState::NoGrip);
 			}
 			else
 			{
@@ -326,6 +327,22 @@ void AVR_MotionController::OnConstruction(const FTransform & Transform)
 	MotionController->SetTrackingSource(Hand); // 4.19 Code
 }
 
+void AVR_MotionController::RumbleController(float Intensity)
+{
+	// SomWorks :D // GetPlayerController
+	APlayerController* MyPlayerController = GetWorld()->GetFirstPlayerController(); // = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+
+	if (UHeadMountedDisplayFunctionLibrary::IsHeadMountedDisplayEnabled())
+	{
+		MyPlayerController->PlayHapticEffect(VRHapticEffect, Hand, Intensity);
+	}
+	else
+	{
+		// SomWorks :D // GamePad ForceFeedback, Deprecated in Epic Template
+		MyPlayerController->PlayDynamicForceFeedback(Intensity, 0.1f, true, true, true, true, EDynamicForceFeedbackAction::Start);
+	}
+}
+
 void AVR_MotionController::StartRumbleController(float Intensity,bool loop)
 {
 	// SomWorks :D // GetPlayerController
@@ -361,7 +378,8 @@ void AVR_MotionController::OnComponentBeginOverlap(UPrimitiveComponent* Overlapp
 		{
 			if (HandOverlappedComps.AddUnique(OtherComp) == 0)
 			{
-				StartRumbleController(0.1, true);
+				RumbleController(0.1f);
+				//StartRumbleController(0.1, true);
 			}
 		}
 		else
@@ -370,7 +388,8 @@ void AVR_MotionController::OnComponentBeginOverlap(UPrimitiveComponent* Overlapp
 			{
 				if (HandOverlappedComps.AddUnique(OtherComp) == 0)
 				{
-					StartRumbleController(0.1, true);
+					RumbleController(0.1f);
+					//StartRumbleController(0.1, true);
 				}
 			}
 		}
@@ -386,10 +405,10 @@ void AVR_MotionController::OnComponentEndOverlap(UPrimitiveComponent* Overlapped
 	}
 }
 
-void AVR_MotionController::OnComponentHitOverlap(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
-{
-	StartRumbleController(UKismetMathLibrary::MapRangeClamped(NormalImpulse.Size(), 0, 1500, 0, 0), false);
-}
+//void AVR_MotionController::OnComponentHitOverlap(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+//{
+//	StartRumbleController(UKismetMathLibrary::MapRangeClamped(NormalImpulse.Size(), 0, 1500, 0, 0), false);
+//}
 
 void AVR_MotionController::UpdateHandAnimation()
 {
@@ -528,6 +547,7 @@ bool AVR_MotionController::ItemOut_Implementation(AActor* Actor)
 
 void AVR_MotionController::ReceiveTriggerPostion(float val)
 {
+	//GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Black, FString::SanitizeFloat(val) , true, FVector2D(10.0f, 10.0f));
 	if (TriggerState == true)
 	{
 		if (TriggerValue < TriggerReleaseLimit)
@@ -541,6 +561,7 @@ void AVR_MotionController::ReceiveTriggerPostion(float val)
 	{
 		if (TriggerValue >= TriggerPullLimit)
 		{
+			//GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Black, FString::Printf(TEXT("%f,%f"), TriggerValue, TriggerPullLimit), true, FVector2D(10.0f, 10.0f));
 			CurrentGripState = EGrip_Code::Grab;
 			TriggerPull();
 			TriggerState = true;

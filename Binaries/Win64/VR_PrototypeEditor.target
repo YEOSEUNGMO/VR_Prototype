@@ -18,11 +18,11 @@
 	"Launch": "$(EngineDir)/Binaries/Win64/UE4Editor.exe",
 	"BuildProducts": [
 		{
-			"Path": "$(ProjectDir)/Binaries/Win64/UE4Editor-VR_Prototype-4491.dll",
+			"Path": "$(ProjectDir)/Binaries/Win64/UE4Editor-VR_Prototype-5949.dll",
 			"Type": "DynamicLibrary"
 		},
 		{
-			"Path": "$(ProjectDir)/Binaries/Win64/UE4Editor-VR_Prototype-4491.pdb",
+			"Path": "$(ProjectDir)/Binaries/Win64/UE4Editor-VR_Prototype-5949.pdb",
 			"Type": "SymbolFile"
 		},
 		{

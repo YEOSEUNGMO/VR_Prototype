@@ -17,17 +17,16 @@ class VR_PROTOTYPE_API UVR_RifleAnimInstance : public UAnimInstance
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "RifleAnim", meta = (AllowPrivateAccess = "true"))
 		class AVR_Rifle* Rifle;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "RifleAnim", meta = (AllowPrivateAccess = "true"))
-		float HammerPulled;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "RifleAnim", meta = (AllowPrivateAccess = "true"))
 		float TriggerPulled;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "RifleAnim", meta = (AllowPrivateAccess = "true"))
-		bool HammerWillBePushed;
+	//UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "RifleAnim", meta = (AllowPrivateAccess = "true"))
+	//	bool TriggerWillBePushed;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "RifleAnim", meta = (AllowPrivateAccess = "true"))
 		bool useOneHandReloading;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "RifleAnim", meta = (AllowPrivateAccess = "true"))
 		bool useTwoHandReloading;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "RifleAnim", meta = (AllowPrivateAccess = "true"))
 		bool ReturnTonormal;
+
 public:
 	UVR_RifleAnimInstance();
 	virtual void NativeUpdateAnimation(float DeltaTime) override;

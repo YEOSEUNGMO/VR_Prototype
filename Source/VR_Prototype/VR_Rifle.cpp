@@ -53,7 +53,7 @@ AVR_Rifle::AVR_Rifle()
 		{
 			RifleMesh->SetAnimInstanceClass(AnimBP_RifleAnimation.Object);
 			UVR_RifleAnimInstance* RifleAnim = Cast<UVR_RifleAnimInstance>(RifleMesh->GetAnimInstance());
-			if (RifleAnim->IsValidLowLevel())
+			if (RifleAnim)
 			{
 				RifleAnim->setRifle(this);
 			}
@@ -83,7 +83,7 @@ AVR_Rifle::AVR_Rifle()
 	ProjSpawn = CreateDefaultSubobject<USceneComponent>(TEXT("ProjectileSpawn"));
 	ProjSpawn->SetupAttachment(RifleMesh,"Spawner");
 
-	ReloadTracker = CreateDefaultSubobject<USphereComponent>(TEXT("ReloadTracker"));
+	/*ReloadTracker = CreateDefaultSubobject<USphereComponent>(TEXT("ReloadTracker"));
 	ReloadTracker->SetupAttachment(MainHandLocation);
 	ReloadTracker->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
 	ReloadTracker->SetRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
@@ -106,14 +106,14 @@ AVR_Rifle::AVR_Rifle()
 	ReloadTarget2->SetRelativeLocation(FVector(-29.1f, 0.0f, 209.5f));
 	ReloadTarget2->SetRelativeRotation(FRotator(0.0f, -40.0f, 0.0f));
 	ReloadTarget2->SetRelativeScale3D(FVector(1.0f, 1.0f, 1.0f));
-	ReloadTarget2->SetBoxExtent(FVector(32.0f, 32.0f, 32.0f));
+	ReloadTarget2->SetBoxExtent(FVector(32.0f, 32.0f, 32.0f));*/
 
-	TrakcerBound = CreateDefaultSubobject<UBoxComponent>(TEXT("ReloadTarget"));
-	TrakcerBound->SetupAttachment(MainHandLocation);
-	TrakcerBound->SetRelativeLocation(FVector(-4.6f, 0.0f, -1.3f));
-	TrakcerBound->SetRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
-	TrakcerBound->SetRelativeScale3D(FVector(0.4f, 0.4f, 0.4f));
-	TrakcerBound->SetBoxExtent(FVector(32.0f, 32.0f, 32.0f));
+	//TrakcerBound = CreateDefaultSubobject<UBoxComponent>(TEXT("ReloadTarget"));
+	//TrakcerBound->SetupAttachment(MainHandLocation);
+	//TrakcerBound->SetRelativeLocation(FVector(-4.6f, 0.0f, -1.3f));
+	//TrakcerBound->SetRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
+	//TrakcerBound->SetRelativeScale3D(FVector(0.4f, 0.4f, 0.4f));
+	//TrakcerBound->SetBoxExtent(FVector(32.0f, 32.0f, 32.0f));
 
 	TargetMark = CreateDefaultSubobject<USceneComponent>(TEXT("TargetMark"));
 	TargetMark->SetupAttachment(RootScene);
@@ -122,7 +122,7 @@ AVR_Rifle::AVR_Rifle()
 	TargetMarkImg->SetupAttachment(TargetMark);
 
 	IsReadyToShot = false;
-	IsReloading = false;
+	//IsReloading = false;
 	BottomButtonPressed = false;
 	GripState = ERifleGripState::NoGrip;
 	HoldingOwner = nullptr;
@@ -166,14 +166,14 @@ void AVR_Rifle::setMainHand(AVR_MotionController* val)
 void AVR_Rifle::LateUpdate(float DeltaTime)
 {
 	RifleAnim = Cast< UVR_RifleAnimInstance>(RifleMesh->GetAnimInstance());
-	//RifleAnim->setRifle(this);
+	RifleAnim->setRifle(this);
 	TickEvent.Remove(TickEventHandle_LateUpdate);
 	TickEventHandle_SetTriggerPosition = TickEvent.AddUObject(this, &AVR_Rifle::SetTriggerPosition);
 }
 
 void AVR_Rifle::SetTriggerPosition(float DeltaTime)
 {
-	if (IsValid(MainHand))
+	if (MainHand->IsValidLowLevel())
 	{
 		RifleAnim->setTriggerPulled(MainHand->GetTriggerValue());
 	}
@@ -204,132 +204,132 @@ void AVR_Rifle::ClassifyState(float DeltaTime)
 		SetGripState(ERifleGripState::NoGrip);
 	}
 }
-
-void AVR_Rifle::Tracker_Initialize()
-{
-	ReloadTracker->SetWorldLocation(MainHand->GetGrabSphere()->GetComponentLocation());
-	Tracker_oldLocation = MainHand->GetGrabSphere()->GetComponentLocation();
-}
-
-void AVR_Rifle::MaindHand_CheckStart()
-{
-	Tracker_Initialize();
-	TickEventHandle_OneHand_Checking = TickEvent.AddUObject(this, &AVR_Rifle::OneHand_Checking);
-}
-
-void AVR_Rifle::MaindHand_CheckFinish()
-{
-	TickEvent.Remove(TickEventHandle_OneHand_Checking);
-}
-
-void AVR_Rifle::OneHand_Checking(float DeltaTime)
-{
-	if (GripState == ERifleGripState::BothGrip)
-	{
-
-	}
-	else
-	{
-		ReloadTrackerTracing(DeltaTime);
-	}
-}
-
-void AVR_Rifle::ReloadTrackerTracing(float time)
-{
-	if (MainHand->IsValidLowLevel())
-	{
-		/*Then 0*/
-		float Alpha = (1.0f / UKismetMathLibrary::Exp(time)) / 1.05f;
-		FVector Lerp_Location = FMath::Lerp(MainHand->GetGrabSphere()->GetComponentLocation(), Tracker_oldLocation, Alpha);
-		ReloadTracker->SetWorldLocation(Lerp_Location);
-
-		/*Then 1*/
-		DrawDebugSphere(GetWorld(), Lerp_Location, ReloadTracker->GetScaledSphereRadius(), 12, FColor::White, false, 0.0f, 0, 0.2f);
-
-		/*Then 1-0*/
-		DrawDebugBox(GetWorld(), TrakcerBound->GetComponentLocation(), TrakcerBound->GetScaledBoxExtent(), FColor::Red, false, 0.0f, 0, 0.2f);
-	
-		/*Then 1-1*/
-		TArray<USceneComponent*> TargetComponents;
-		ReloadTargets->GetChildrenComponents(false, TargetComponents);
-		for (USceneComponent* Components : TargetComponents)
-		{
-			UBoxComponent* ReloadTarget = Cast<UBoxComponent>(Components);
-			DrawDebugBox(GetWorld(), Components->GetComponentLocation(), ReloadTarget->GetScaledBoxExtent(), FColor::Cyan, false, 0.0f, 0, 0.2f);
-		}
-	}
-}
-
-void AVR_Rifle::AfterOneHandShot()
-{
-	OneHandReloadTriggerSet();
-}
-
-void AVR_Rifle::OneHandReloadTriggerSet()
-{
-	MaindHand_CheckStart();
-	ReloadTracker->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	ReloadTracker->OnComponentBeginOverlap.AddDynamic(this, &AVR_Rifle::OnComponentBeginOverlap);
-	ReloadTracker->OnComponentEndOverlap.AddDynamic(this, &AVR_Rifle::OnComponentEndOverlap);
-}
-
-void AVR_Rifle::OnComponentBeginOverlap(class UPrimitiveComponent* OverlappedComp, AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	if (OtherComp->GetAttachParent() == ReloadTargets)
-	{
-		StartOneHandReloading();
-	}
-}
-
-void AVR_Rifle::OnComponentEndOverlap(class UPrimitiveComponent* OverlappedComp, AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
-{
-	if (OtherComp == TrakcerBound)
-	{
-		Tracker_Initialize();
-	}
-}
-
-void AVR_Rifle::OneHandReloadingTriggerRemove()
-{
-	MaindHand_CheckFinish();
-	ReloadTracker->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	ReloadTracker->OnComponentBeginOverlap.RemoveAll(this);
-	ReloadTracker->OnComponentEndOverlap.RemoveAll(this);
-}
-
-void AVR_Rifle::StartOneHandReloading()
-{
-	OneHandReloadingTriggerRemove();
-	IsReloading = true;
-	RifleAnim->setuseOneHandReloading(true);
-	
-	UVR_HandAnimInstance* Hand_Anim = Cast<UVR_HandAnimInstance>(MainHand->GetHandMesh()->GetAnimInstance());
-	Hand_Anim->setuseOneHandReload(true);
-}
-
-void AVR_Rifle::AfterTwoHandShot()
-{
-	IsReloading = true;
-	RifleAnim->setuseTwoHandReloading(true);
-	UVR_HandAnimInstance* Hand_Anim = Cast<UVR_HandAnimInstance>(MainHand->GetHandMesh()->GetAnimInstance());
-	Hand_Anim->setuseTwoHandReload(true);
-}
-
-void AVR_Rifle::Reloaded()
-{
-	/*Then 0*/
-	IsReadyToShot = true;
-
-	/*Then 1*/
-	if (MainHand->IsValidLowLevel())
-	{
-		UVR_HandAnimInstance* Hand_Anim = Cast<UVR_HandAnimInstance>(MainHand->GetHandMesh()->GetAnimInstance());
-		Hand_Anim->setReturnToMain(true);
-	}
-
-	/*Then 2*/
-	IsReloading = false;
-}
+///*Reload ฐüทร*/
+//void AVR_Rifle::Tracker_Initialize()
+//{
+//	ReloadTracker->SetWorldLocation(MainHand->GetGrabSphere()->GetComponentLocation());
+//	Tracker_oldLocation = MainHand->GetGrabSphere()->GetComponentLocation();
+//}
+//
+//void AVR_Rifle::MaindHand_CheckStart()
+//{
+//	Tracker_Initialize();
+//	TickEventHandle_OneHand_Checking = TickEvent.AddUObject(this, &AVR_Rifle::OneHand_Checking);
+//}
+//
+//void AVR_Rifle::MaindHand_CheckFinish()
+//{
+//	TickEvent.Remove(TickEventHandle_OneHand_Checking);
+//}
+//
+//void AVR_Rifle::OneHand_Checking(float DeltaTime)
+//{
+//	if (GripState == ERifleGripState::BothGrip)
+//	{
+//
+//	}
+//	else
+//	{
+//		ReloadTrackerTracing(DeltaTime);
+//	}
+//}
+//
+//void AVR_Rifle::ReloadTrackerTracing(float time)
+//{
+//	if (MainHand->IsValidLowLevel())
+//	{
+//		/*Then 0*/
+//		float Alpha = (1.0f / UKismetMathLibrary::Exp(time)) / 1.05f;
+//		FVector Lerp_Location = FMath::Lerp(MainHand->GetGrabSphere()->GetComponentLocation(), Tracker_oldLocation, Alpha);
+//		ReloadTracker->SetWorldLocation(Lerp_Location);
+//
+//		/*Then 1*/
+//		DrawDebugSphere(GetWorld(), Lerp_Location, ReloadTracker->GetScaledSphereRadius(), 12, FColor::White, false, 0.0f, 0, 0.2f);
+//
+//		/*Then 1-0*/
+//		DrawDebugBox(GetWorld(), TrakcerBound->GetComponentLocation(), TrakcerBound->GetScaledBoxExtent(), FColor::Red, false, 0.0f, 0, 0.2f);
+//	
+//		/*Then 1-1*/
+//		TArray<USceneComponent*> TargetComponents;
+//		ReloadTargets->GetChildrenComponents(false, TargetComponents);
+//		for (USceneComponent* Components : TargetComponents)
+//		{
+//			UBoxComponent* ReloadTarget = Cast<UBoxComponent>(Components);
+//			DrawDebugBox(GetWorld(), Components->GetComponentLocation(), ReloadTarget->GetScaledBoxExtent(), FColor::Cyan, false, 0.0f, 0, 0.2f);
+//		}
+//	}
+//}
+//
+//void AVR_Rifle::AfterOneHandShot()
+//{
+//	OneHandReloadTriggerSet();
+//}
+//
+//void AVR_Rifle::OneHandReloadTriggerSet()
+//{
+//	MaindHand_CheckStart();
+//	ReloadTracker->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+//	ReloadTracker->OnComponentBeginOverlap.AddDynamic(this, &AVR_Rifle::OnComponentBeginOverlap);
+//	ReloadTracker->OnComponentEndOverlap.AddDynamic(this, &AVR_Rifle::OnComponentEndOverlap);
+//}
+//
+//void AVR_Rifle::OnComponentBeginOverlap(class UPrimitiveComponent* OverlappedComp, AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+//{
+//	if (OtherComp->GetAttachParent() == ReloadTargets)
+//	{
+//		StartOneHandReloading();
+//	}
+//}
+//
+//void AVR_Rifle::OnComponentEndOverlap(class UPrimitiveComponent* OverlappedComp, AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+//{
+//	if (OtherComp == TrakcerBound)
+//	{
+//		Tracker_Initialize();
+//	}
+//}
+//
+//void AVR_Rifle::OneHandReloadingTriggerRemove()
+//{
+//	MaindHand_CheckFinish();
+//	ReloadTracker->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+//	ReloadTracker->OnComponentBeginOverlap.RemoveAll(this);
+//	ReloadTracker->OnComponentEndOverlap.RemoveAll(this);
+//}
+//
+//void AVR_Rifle::StartOneHandReloading()
+//{
+//	OneHandReloadingTriggerRemove();
+//	IsReloading = true;
+//	RifleAnim->setuseOneHandReloading(true);
+//	
+//	UVR_HandAnimInstance* Hand_Anim = Cast<UVR_HandAnimInstance>(MainHand->GetHandMesh()->GetAnimInstance());
+//	Hand_Anim->setuseOneHandReload(true);
+//}
+//
+//void AVR_Rifle::AfterTwoHandShot()
+//{
+//	IsReloading = true;
+//	RifleAnim->setuseTwoHandReloading(true);
+//	UVR_HandAnimInstance* Hand_Anim = Cast<UVR_HandAnimInstance>(MainHand->GetHandMesh()->GetAnimInstance());
+//	Hand_Anim->setuseTwoHandReload(true);
+//}
+//
+//void AVR_Rifle::Reloaded()
+//{
+//	/*Then 0*/
+//	IsReadyToShot = true;
+//
+//	/*Then 1*/
+//	if (MainHand->IsValidLowLevel())
+//	{
+//		UVR_HandAnimInstance* Hand_Anim = Cast<UVR_HandAnimInstance>(MainHand->GetHandMesh()->GetAnimInstance());
+//		Hand_Anim->setReturnToMain(true);
+//	}
+//
+//	/*Then 2*/
+//	IsReloading = false;
+//}
 
 void AVR_Rifle::TargetMarkMatching(float DeltaTime)
 {
@@ -637,7 +637,8 @@ bool AVR_Rifle::IsCatchableComp_Implementation(USceneComponent* SelectedComponen
 
 void AVR_Rifle::TriggerPulled()
 {
-	TryShot();
+	//TryShot();
+	Shot();
 }
 
 void AVR_Rifle::TryShot()
@@ -660,19 +661,21 @@ void AVR_Rifle::Shot()
 
 	/*Then 1*/
 	IsReadyToShot = false;
-	if (!SubHand->IsValidLowLevel())
+	/*if (!(SubHand->IsValidLowLevel()))
 	{
 		AfterOneHandShot();
 	}
 	else
 	{
 		AfterTwoHandShot();
-	}
+	}*/
 	/*Then 2*/
-	if (GetAttachParentActor()->IsValidLowLevel())
+	if (GetAttachParentActor()!=nullptr)
 	{
 		AVR_MotionController* MotionController = Cast<AVR_MotionController>(GetAttachParentActor());
-		MotionController->StartRumbleController(0.7f, false);
+		if (MotionController)
+			MotionController->RumbleController(0.7f);
+			//MotionController->StartRumbleController(0.7f, false);
 	}
 
 }
@@ -727,7 +730,6 @@ void AVR_Rifle::MainGrip_Enter()
 {
 	SetActorRelativeTransform(InvertTransform(MainHandLocation->GetRelativeTransform()));
 	MainHand->GetHandMesh()->SetRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
-	//MainHand->GetHandMesh()->SetRelativeRotation(Rotator);
 }
 
 void AVR_Rifle::BothGrip_Enter()

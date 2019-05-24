@@ -54,6 +54,8 @@ public:
 	virtual void OnConstruction(const FTransform & Transform) override;
 
 	UFUNCTION(BlueprintCallable, Category = "MotionController")
+		void RumbleController(float Intensity);
+	UFUNCTION(BlueprintCallable, Category = "MotionController")
 		void StartRumbleController(float Intensity, bool loop);
 
 	UFUNCTION(BlueprintCallable, Category = "MotionController")
@@ -63,8 +65,8 @@ public:
 		void OnComponentBeginOverlap(class UPrimitiveComponent* OverlappedComp, AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 	UFUNCTION()
 		void OnComponentEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-	UFUNCTION()
-		void OnComponentHitOverlap(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+	//UFUNCTION()
+	//	void OnComponentHitOverlap(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
 	UFUNCTION(BlueprintCallable, Category = "MotionController")
 		void ReceiveTriggerPostion(float val);

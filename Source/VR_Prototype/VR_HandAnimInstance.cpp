@@ -1,21 +1,29 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "VR_HandAnimInstance.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Engine/Engine.h"
 
 UVR_HandAnimInstance::UVR_HandAnimInstance()
 {
-	//GripValue = 0;
+	Grip = 0.0;
+	InterpSpeed = 7.0f;
 	RifleGrabed = false;
 	CurrentGripState = EGrip_Code::Open;
 	CurrentRifleGripState = ERifleGripState::NoGrip;
-	//CurrentWeaponState = EWeaponState_Code::Idle;
 }
-//
-//void UVR_HandAnimInstance::SetGripState(float val)
-//{
-//	GripValue = val;
-//}
+
+void UVR_HandAnimInstance::setCurrentRifleGripState(ERifleGripState val)
+{
+	CurrentRifleGripState = val;
+}
+
+void UVR_HandAnimInstance::NativeUpdateAnimation(float DeltaTime)
+{
+	Super::NativeUpdateAnimation(DeltaTime);
+	float TempGrip = UKismetMathLibrary::Conv_IntToFloat(UKismetMathLibrary::Conv_ByteToInt((uint8)CurrentGripState)) / 2;
+	Grip = FMath::FInterpConstantTo(Grip, TempGrip, DeltaTime, InterpSpeed);	
+}
 
 void UVR_HandAnimInstance::SetGripState(EGrip_Code GripState)
 {
@@ -46,6 +54,7 @@ void UVR_HandAnimInstance::setReturnToMain(bool val)
 {
 	ReturnToMain = val;
 }
+
 //void UVR_HandAnimInstance::SetWeaponState(EWeaponState_Code val)
 //{
 //	CurrentWeaponState = val;

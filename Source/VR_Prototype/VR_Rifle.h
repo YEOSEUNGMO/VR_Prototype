@@ -25,27 +25,13 @@ class VR_PROTOTYPE_API AVR_Rifle : public AActor, public IIN_CatchableItem,publi
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
 		class USkeletalMeshComponent* RifleMesh;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
-		class USceneComponent* ReloadParent;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
 		class UBoxComponent* MainHandBox;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
 		class USceneComponent* MainHandLocation;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
 		class UBoxComponent* SubHandBox;
-	//UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
-	//	class UBoxComponent* MagazineBox;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
 		class USceneComponent* SubHandLocation;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
-		class USphereComponent* ReloadTracker;//ReloadingTracker
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
-		class USceneComponent* ReloadTargets; //ReChargeTargets
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
-		class UBoxComponent* ReloadTarget1; //ReChargeTarget1
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
-		class UBoxComponent* ReloadTarget2; //ReChargeTarget2
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
-		class UBoxComponent* TrakcerBound; //TrackerBound
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
 		class USceneComponent* TargetMark;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
@@ -56,26 +42,42 @@ class VR_PROTOTYPE_API AVR_Rifle : public AActor, public IIN_CatchableItem,publi
 		class AVR_MotionController* MainHand;//firstHand
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
 		class AVR_MotionController* SubHand;//SecondHand
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
-		FVector Tracker_oldLocation;
+	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
 		FRotator Rotator;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
 		FRotator HandRotDiff;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
 		AActor* HoldingOwner;
-	/*UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
-		class AVR_RifleMagazine* AttachedMagazine;*/
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
 		bool IsReadyToShot;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
-		bool IsReloading;
+
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
 		bool BottomButtonPressed;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
 		ERifleGripState GripState;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
 		int Overload_Limit = 4;//과부하 한계
+	//UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
+	//	FVector Tracker_oldLocation;
+	//UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
+	//	bool IsReloading;
+	//UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
+	//	class AVR_RifleMagazine* AttachedMagazine;
+	//UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
+	//	class USceneComponent* ReloadParent;
+	//UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
+	//	class UBoxComponent* MagazineBox;
+	//UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
+	//	class USphereComponent* ReloadTracker;//ReloadingTracker
+	//UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
+	//	class USceneComponent* ReloadTargets; //ReChargeTargets
+	//UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
+	//	class UBoxComponent* ReloadTarget1; //ReChargeTarget1
+	//UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
+	//	class UBoxComponent* ReloadTarget2; //ReChargeTarget2
+	//UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
+	//	class UBoxComponent* TrakcerBound; //TrackerBound
 public:
 	// Sets default values for this actor's properties
 	AVR_Rifle();
@@ -86,8 +88,7 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
 		class USceneComponent* ProjSpawn;
 
-	UFUNCTION(BlueprintCallable, Category = "Rifle")
-		void ReloadTrackerTracing(float time);
+	
 	UFUNCTION(BlueprintCallable, Category = "Rifle")
 		void setMainHand(AVR_MotionController* val);
 	UFUNCTION(BlueprintCallable, Category = "Rifle")
@@ -97,6 +98,34 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Rifle")
 		void ClassifyState(float DeltaTime);
 	UFUNCTION(BlueprintCallable, Category = "Rifle")
+		void TargetMarkMatching(float DeltaTime);
+	UFUNCTION(BlueprintCallable, Category = "Rifle")
+		void TriggerPulled();
+	UFUNCTION(BlueprintCallable, Category = "Rifle")
+		void TryShot();
+	UFUNCTION(BlueprintCallable, Category = "Rifle")
+		void Shot();
+	UFUNCTION(BlueprintCallable, Category = "Rifle")
+		void TriggerReleased();
+	
+	UFUNCTION(BlueprintCallable, Category = "Rifle")
+		void SetGripState(ERifleGripState state);
+	UFUNCTION(BlueprintCallable, Category = "Rifle")
+		void MainGrip_Enter();
+	UFUNCTION(BlueprintCallable, Category = "Rifle")
+		void BothGrip_Enter();
+	UFUNCTION(BlueprintCallable, Category = "Rifle")
+		void MainGrip_Tick();
+	UFUNCTION(BlueprintCallable, Category = "Rifle")
+		void BothGrip_Tick();
+	UFUNCTION(BlueprintCallable, Category = "Rifle")
+		FTransform InvertTransform(FTransform transform);
+
+	//UFUNCTION(BlueprintCallable, Category = "Rifle")
+	//	void ReloadTrackerTracing(float time)
+	//void OnComponentBeginOverlap(class UPrimitiveComponent* OverlappedComp, AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	//void OnComponentEndOverlap(class UPrimitiveComponent* OverlappedComp, AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	/*UFUNCTION(BlueprintCallable, Category = "Rifle")
 		void Tracker_Initialize();
 	UFUNCTION(BlueprintCallable, Category = "Rifle")
 		void MaindHand_CheckStart();
@@ -115,31 +144,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Rifle")
 		void AfterTwoHandShot();
 	UFUNCTION(BlueprintCallable, Category = "Rifle")
-		void Reloaded();
-	UFUNCTION(BlueprintCallable, Category = "Rifle")
-		void TargetMarkMatching(float DeltaTime);
-	UFUNCTION(BlueprintCallable, Category = "Rifle")
-		void TriggerPulled();
-	UFUNCTION(BlueprintCallable, Category = "Rifle")
-		void TryShot();
-	UFUNCTION(BlueprintCallable, Category = "Rifle")
-		void Shot();
-	UFUNCTION(BlueprintCallable, Category = "Rifle")
-		void TriggerReleased();
-	void OnComponentBeginOverlap(class UPrimitiveComponent* OverlappedComp, AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-	void OnComponentEndOverlap(class UPrimitiveComponent* OverlappedComp, AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-	UFUNCTION(BlueprintCallable, Category = "Rifle")
-		void SetGripState(ERifleGripState state);
-	UFUNCTION(BlueprintCallable, Category = "Rifle")
-		void MainGrip_Enter();
-	UFUNCTION(BlueprintCallable, Category = "Rifle")
-		void BothGrip_Enter();
-	UFUNCTION(BlueprintCallable, Category = "Rifle")
-		void MainGrip_Tick();
-	UFUNCTION(BlueprintCallable, Category = "Rifle")
-		void BothGrip_Tick();
-	UFUNCTION(BlueprintCallable, Category = "Rifle")
-		FTransform InvertTransform(FTransform transform);
+		void Reloaded();*/
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

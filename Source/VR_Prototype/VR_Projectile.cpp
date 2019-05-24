@@ -50,14 +50,14 @@ AVR_Projectile::AVR_Projectile()
 	//ProjMoveMent->bIsHomingProjectile = false;//발사체를 유도 발사체 처럼 행동하게 설정.
 	//ProjMoveMent->HomingAccelerationMagnitude = 10000.0f;
 
-	InitialLifeSpan = 3.0f;// 3초뒤 사라짐.
+	//InitialLifeSpan = 3.0f;// 3초뒤 사라짐.
 }
 
 // Called when the game starts or when spawned
 void AVR_Projectile::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	SetLifeSpan(3.0f);
 }
 
 // Called every frame
