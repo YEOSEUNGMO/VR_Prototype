@@ -27,8 +27,8 @@ UENUM(BlueprintType)
 enum class EGrip_Code : uint8
 {
 	Open = 0,
-	CanGrab,
-	Grab
+	CanGrip,
+	Grip
 };
 
 UENUM(BlueprintType)

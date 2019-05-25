@@ -36,7 +36,7 @@ AVR_Rifle::AVR_Rifle()
 	RootComponent = RootScene;
 
 	RifleMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("RifleMesh"));
-	RifleMesh->SetupAttachment(RootComponent);
+	//RifleMesh->SetupAttachment(RootComponent);
 	RifleMesh->AttachTo(RootComponent);
 	RifleMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	//RifleMesh->SetRelativeLocation(FVector(20.0f, 00.0f, 0.0f));
@@ -61,16 +61,25 @@ AVR_Rifle::AVR_Rifle()
 	}
 
 	MainHandBox = CreateDefaultSubobject<UBoxComponent>("MainHandBox");
-	MainHandBox->SetupAttachment(RifleMesh);
+	//MainHandBox->SetupAttachment(RifleMesh);
+	MainHandBox->AttachTo(RifleMesh);
+	MainHandBox->BodyInstance.SetCollisionProfileName(TEXT("OverlapAllDynamic"));
+	MainHandBox->SetGenerateOverlapEvents(true);
+
 
 	MainHandLocation = CreateDefaultSubobject<USceneComponent>("MainHandLocation");
-	MainHandLocation->SetupAttachment(RifleMesh);
+	//MainHandLocation->SetupAttachment(RifleMesh);
+	MainHandLocation->AttachTo(RifleMesh);
 
 	SubHandBox = CreateDefaultSubobject<UBoxComponent>("SubHandBox");
-	SubHandBox->SetupAttachment(RifleMesh);
+	//SubHandBox->SetupAttachment(RifleMesh);
+	SubHandBox->AttachTo(RifleMesh);
+	SubHandBox->BodyInstance.SetCollisionProfileName(TEXT("OverlapAllDynamic"));
+	SubHandBox->SetGenerateOverlapEvents(true);
 
 	SubHandLocation = CreateDefaultSubobject<USceneComponent>("SubHandLocation");
 	SubHandLocation->SetupAttachment(RifleMesh);
+	SubHandLocation->AttachTo(RifleMesh);
 
 	/*MagazineBox = CreateDefaultSubobject<UBoxComponent>("MagazineBox");
 	MagazineBox->SetCollisionProfileName(TEXT("OverlapAllDynamic"));
@@ -81,7 +90,8 @@ AVR_Rifle::AVR_Rifle()
 	ProjectileClass = AVR_Projectile::StaticClass();
 
 	ProjSpawn = CreateDefaultSubobject<USceneComponent>(TEXT("ProjectileSpawn"));
-	ProjSpawn->SetupAttachment(RifleMesh,"Spawner");
+	//ProjSpawn->SetupAttachment(RifleMesh,"Spawner");
+	ProjSpawn->AttachTo(RifleMesh, "Spawner");
 
 	/*ReloadTracker = CreateDefaultSubobject<USphereComponent>(TEXT("ReloadTracker"));
 	ReloadTracker->SetupAttachment(MainHandLocation);
@@ -116,7 +126,8 @@ AVR_Rifle::AVR_Rifle()
 	//TrakcerBound->SetBoxExtent(FVector(32.0f, 32.0f, 32.0f));
 
 	TargetMark = CreateDefaultSubobject<USceneComponent>(TEXT("TargetMark"));
-	TargetMark->SetupAttachment(RootScene);
+	//TargetMark->SetupAttachment(RootScene);
+	TargetMark->AttachTo(RootScene);
 	TargetMark->bVisible = true;
 	TargetMarkImg = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ReloadTargetImg"));
 	TargetMarkImg->SetupAttachment(TargetMark);
@@ -207,8 +218,8 @@ void AVR_Rifle::ClassifyState(float DeltaTime)
 ///*Reload 관련*/
 //void AVR_Rifle::Tracker_Initialize()
 //{
-//	ReloadTracker->SetWorldLocation(MainHand->GetGrabSphere()->GetComponentLocation());
-//	Tracker_oldLocation = MainHand->GetGrabSphere()->GetComponentLocation();
+//	ReloadTracker->SetWorldLocation(MainHand->GetGripSphere()->GetComponentLocation());
+//	Tracker_oldLocation = MainHand->GetGripSphere()->GetComponentLocation();
 //}
 //
 //void AVR_Rifle::MaindHand_CheckStart()
@@ -240,7 +251,7 @@ void AVR_Rifle::ClassifyState(float DeltaTime)
 //	{
 //		/*Then 0*/
 //		float Alpha = (1.0f / UKismetMathLibrary::Exp(time)) / 1.05f;
-//		FVector Lerp_Location = FMath::Lerp(MainHand->GetGrabSphere()->GetComponentLocation(), Tracker_oldLocation, Alpha);
+//		FVector Lerp_Location = FMath::Lerp(MainHand->GetGripSphere()->GetComponentLocation(), Tracker_oldLocation, Alpha);
 //		ReloadTracker->SetWorldLocation(Lerp_Location);
 //
 //		/*Then 1*/
@@ -375,7 +386,7 @@ AActor* AVR_Rifle::Dropped_Implementation(AActor* OldOwner)
 	{
 		/*Then 0*/
 		UVR_HandAnimInstance* HandAnimation = Cast<UVR_HandAnimInstance>(SubHand->GetHandMesh()->GetAnimInstance());
-		HandAnimation->setRifleSubGrabed(false);
+		HandAnimation->setRifleSubGripped(false);
 
 		SubHand->GetHandMesh()->DetachFromComponent(DetachRules);
 		SubHand->GetHandMesh()->AttachToComponent(SubHand->GetRotateDummy(), AttachRules);
@@ -391,13 +402,16 @@ AActor* AVR_Rifle::Dropped_Implementation(AActor* OldOwner)
 		if (OldOwner == MainHand)
 		{
 			UVR_HandAnimInstance* HandAnimation = Cast<UVR_HandAnimInstance>(MainHand->GetHandMesh()->GetAnimInstance());
-			HandAnimation->setRifleGrabed(false);
+			HandAnimation->setRifleGripped(false);
 
 			RootComponent->DetachFromComponent(DetachRules);
 			MainHand->GetHandMesh()->SetRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
 
-			MainHand->TriggerPullActions.Remove(MainHand->TriggerPullActionsHandle);
-			MainHand->TriggerReleaseActions.Remove(MainHand->TriggerReleaseActionsHandle);
+			/*MainHand->TriggerPullActions.Remove(MainHand->TriggerPullActionsHandle);
+			MainHand->TriggerReleaseActions.Remove(MainHand->TriggerReleaseActionsHandle);*/
+			
+			MainHand->TriggerPullActions.Clear();
+			MainHand->TriggerReleaseActions.Clear();
 
 			MainHand = nullptr;
 
@@ -408,7 +422,7 @@ AActor* AVR_Rifle::Dropped_Implementation(AActor* OldOwner)
 				{
 					return nullptr;
 				}
-				HandAnimation->setRifleSubGrabed(false);
+				HandAnimation->setRifleSubGripped(false);
 
 				SubHand->GetHandMesh()->DetachFromComponent(DetachRules);
 				SubHand->GetHandMesh()->AttachToComponent(SubHand->GetRotateDummy(), AttachRules);
@@ -515,7 +529,7 @@ USceneComponent* AVR_Rifle::Catched_Implementation(USceneComponent* ItemComponen
 
 			/*Then 2*/
 			UVR_HandAnimInstance* HandAnimation = Cast<UVR_HandAnimInstance>(MainHand->GetHandMesh()->GetAnimInstance());
-			HandAnimation->setRifleGrabed(true);
+			HandAnimation->setRifleGripped(true);
 
 			/*Then 3*/
 			return MainHandBox;
@@ -524,6 +538,7 @@ USceneComponent* AVR_Rifle::Catched_Implementation(USceneComponent* ItemComponen
 		{
 			if (SubHandBox == ItemComponent)
 			{
+				GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Black,TEXT("SUBHAND"), true, FVector2D(10.0f, 10.0f));
 				SubHand = MotionController;
 
 				/*Then0*/
@@ -531,7 +546,7 @@ USceneComponent* AVR_Rifle::Catched_Implementation(USceneComponent* ItemComponen
 
 				/*Then1*/
 				UVR_HandAnimInstance* HandAnimation = Cast<UVR_HandAnimInstance>(SubHand->GetHandMesh()->GetAnimInstance());
-				HandAnimation->setRifleGrabed(true);
+				HandAnimation->setRifleGripped(true);
 				/*Then2*/
 				return SubHandBox;
 			}
@@ -552,7 +567,7 @@ USceneComponent* AVR_Rifle::Catched_Implementation(USceneComponent* ItemComponen
 
 					/*Then 2*/
 					UVR_HandAnimInstance* HandAnimation = Cast<UVR_HandAnimInstance>(MainHand->GetHandMesh()->GetAnimInstance());
-					HandAnimation->setRifleGrabed(true);
+					HandAnimation->setRifleGripped(true);
 
 					/*Then 3*/
 					return MainHandBox;
@@ -651,12 +666,13 @@ void AVR_Rifle::TryShot()
 
 void AVR_Rifle::Shot()
 {
-	AActor* spawnBullet;
+	//AActor* spawnBullet;
 	const FTransform SpawnTransform = FTransform(FRotator(0.0f, 0.0f, 0.0f), FVector(0.0f, 0.0f, 0.0f), FVector(1.0f, 1.0f, 1.0f)); // = FTransform::Identity;
 	//FAttachmentTransformRules AttachRules(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::KeepWorld, false);
 
 	/*Then 0*/
-	spawnBullet = GetWorld()->SpawnActorDeferred<AVR_Projectile>(AVR_Projectile::StaticClass(), ProjSpawn->GetComponentTransform(), this, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+	//spawnBullet = GetWorld()->SpawnActorDeferred<AVR_Projectile>(AVR_Projectile::StaticClass(), ProjSpawn->GetComponentTransform(), this, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+	GetWorld()->SpawnActorDeferred<AVR_Projectile>(AVR_Projectile::StaticClass(), ProjSpawn->GetComponentTransform(), this, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
 	//사운드 출력
 
 	/*Then 1*/

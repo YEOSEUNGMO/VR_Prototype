@@ -18,16 +18,16 @@ class VR_PROTOTYPE_API UVR_HandAnimInstance : public UAnimInstance
 	UVR_HandAnimInstance();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HandAnimation", meta = (AllowPrivateAccess = "true"))
-		float Grip;
+		float GripValue;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HandAnimation", meta = (AllowPrivateAccess = "true"))
 		float InterpSpeed;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HandAnimation", meta = (AllowPrivateAccess = "true"))
-		bool RifleGrabed;
+		bool RifleGripped;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HandAnimation", meta = (AllowPrivateAccess = "true"))
-		bool RifleSubGrabed;
+		bool RifleSubGripped;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HandAnimation", meta = (AllowPrivateAccess = "true"))
 		ERifleGripState CurrentRifleGripState;
@@ -44,21 +44,15 @@ class VR_PROTOTYPE_API UVR_HandAnimInstance : public UAnimInstance
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HandAnimation", meta = (AllowPrivateAccess = "true"))
 		bool ReturnToMain;
 public:
-	virtual void NativeUpdateAnimation(float DeltaTime) override;
-	//UFUNCTION(BlueprintCallable, Category = "VRTemplate|Teleportation")
-	//	void SetGripState(float val);
-	//UFUNCTION(BlueprintCallable, Category = "HandAnimation")
-		//void SetWeaponState(EWeaponState_Code val);
+	//virtual void NativeUpdateAnimation(float DeltaTime) override;
 	UFUNCTION(BlueprintCallable, Category = "HandAnimation")
 		void SetGripState(EGrip_Code GripState);
+	UFUNCTION(BlueprintCallable, Category = "HandAnimation")
+		void SetGripValue(float val);
 
-	//UFUNCTION(BlueprintCallable, Category = "HandAnimation")
-	//	void SetRifleGraped(bool val);
-	//UFUNCTION(BlueprintCallable, Category = "HandAnimation")
-	//	void SetRifleSubGraped(bool val);
 
-	UFUNCTION(BlueprintCallable, Category = "MotionController")
-		void setCurrentRifleGripState(ERifleGripState val);
+//	UFUNCTION(BlueprintCallable, Category = "MotionController")
+//		void setCurrentRifleGripState(ERifleGripState val);
 
 	UFUNCTION(BlueprintCallable, Category = "MotionController")
 		void setuseOneHandReload(bool val);
@@ -67,20 +61,22 @@ public:
 		void setuseTwoHandReload(bool val);
 
 	UFUNCTION(BlueprintCallable, Category = "MotionController")
-		void setRifleGrabed(bool val);
+		void setRifleGripped(bool val);
 
 	UFUNCTION(BlueprintCallable, Category = "MotionController")
-		void setRifleSubGrabed(bool val);
+		void setRifleSubGripped(bool val);
 
 	UFUNCTION(BlueprintCallable, Category = "MotionController")
 		void setReturnToMain(bool val);
-	
-	
-private:
 
-	//UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HandAnim", meta = (AllowPrivateAccess = "true"))
-	//	float GripValue;
-
+	//UFUNCTION(BlueprintCallable, Category = "VRTemplate|Teleportation")
+	//	void SetGripState(float val);
+	//UFUNCTION(BlueprintCallable, Category = "HandAnimation")
+		//void SetWeaponState(EWeaponState_Code val);
+	//UFUNCTION(BlueprintCallable, Category = "HandAnimation")
+	//	void SetRifleGraped(bool val);
+	//UFUNCTION(BlueprintCallable, Category = "HandAnimation")
+	//	void SetRifleSubGraped(bool val);
 protected:
 
 public:

@@ -24,18 +24,7 @@ class VR_PROTOTYPE_API AVR_Rifle : public AActor, public IIN_CatchableItem,publi
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
 		class USkeletalMeshComponent* RifleMesh;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
-		class UBoxComponent* MainHandBox;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
-		class USceneComponent* MainHandLocation;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
-		class UBoxComponent* SubHandBox;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
-		class USceneComponent* SubHandLocation;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
-		class USceneComponent* TargetMark;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
-		class UStaticMeshComponent* TargetMarkImg;
+
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
 		class UVR_RifleAnimInstance* RifleAnim;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
@@ -82,10 +71,22 @@ public:
 	// Sets default values for this actor's properties
 	AVR_Rifle();
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle")
+		class UBoxComponent* MainHandBox;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle")
+		class USceneComponent* MainHandLocation;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle")
+		class UBoxComponent* SubHandBox;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle")
+		class USceneComponent* SubHandLocation;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle")
+		class USceneComponent* TargetMark;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle")
+		class UStaticMeshComponent* TargetMarkImg;
 	UPROPERTY(EditDefaultsOnly, Category = "Projectile")
 		TSubclassOf<AVR_Projectile> ProjectileClass;//TSubclassOf:제공된 템플릿 타입의 계층 내에 바인드된 클래스 타입을 정의하도록한다.
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle")
 		class USceneComponent* ProjSpawn;
 
 	

@@ -6,23 +6,29 @@
 
 UVR_HandAnimInstance::UVR_HandAnimInstance()
 {
-	Grip = 0.0;
+	GripValue = 0.0;
 	InterpSpeed = 7.0f;
-	RifleGrabed = false;
+	RifleGripped = false;
 	CurrentGripState = EGrip_Code::Open;
 	CurrentRifleGripState = ERifleGripState::NoGrip;
 }
 
-void UVR_HandAnimInstance::setCurrentRifleGripState(ERifleGripState val)
-{
-	CurrentRifleGripState = val;
-}
+//void UVR_HandAnimInstance::setCurrentRifleGripState(ERifleGripState val)
+//{
+//	CurrentRifleGripState = val;
+//}
 
-void UVR_HandAnimInstance::NativeUpdateAnimation(float DeltaTime)
+//void UVR_HandAnimInstance::NativeUpdateAnimation(float DeltaTime)
+//{
+//	Super::NativeUpdateAnimation(DeltaTime);
+//	float TempGrip = UKismetMathLibrary::Conv_IntToFloat(UKismetMathLibrary::Conv_ByteToInt((uint8)CurrentGripState)) / 2;
+//	GripValue = FMath::FInterpConstantTo(GripValue, TempGrip, DeltaTime, InterpSpeed);
+//}
+
+void UVR_HandAnimInstance::SetGripValue(float val)
 {
-	Super::NativeUpdateAnimation(DeltaTime);
-	float TempGrip = UKismetMathLibrary::Conv_IntToFloat(UKismetMathLibrary::Conv_ByteToInt((uint8)CurrentGripState)) / 2;
-	Grip = FMath::FInterpConstantTo(Grip, TempGrip, DeltaTime, InterpSpeed);	
+	GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Black, FString::SanitizeFloat(val), true, FVector2D(10.0f, 10.0f));
+	GripValue = val;
 }
 
 void UVR_HandAnimInstance::SetGripState(EGrip_Code GripState)
@@ -40,14 +46,14 @@ void UVR_HandAnimInstance::setuseTwoHandReload(bool val)
 	useTwoHandReload = val;
 }
 
-void UVR_HandAnimInstance::setRifleGrabed(bool val)
+void UVR_HandAnimInstance::setRifleGripped(bool val)
 {
-	RifleGrabed = val;
+	RifleGripped = val;
 }
 
-void UVR_HandAnimInstance::setRifleSubGrabed(bool val)
+void UVR_HandAnimInstance::setRifleSubGripped(bool val)
 {
-	RifleSubGrabed = val;
+	RifleSubGripped = val;
 }
 
 void UVR_HandAnimInstance::setReturnToMain(bool val)

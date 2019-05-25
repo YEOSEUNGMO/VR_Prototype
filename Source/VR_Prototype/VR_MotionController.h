@@ -33,7 +33,7 @@ class VR_PROTOTYPE_API AVR_MotionController : public AActor,public IIN_ItemOwner
 		class USkeletalMeshComponent* HandMesh;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "MotionController", meta = (AllowPrivateAccess = "true"))
-		class USphereComponent* GrabSphere;
+		class USphereComponent* GripSphere;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "MotionController", meta = (AllowPrivateAccess = "true"))
 		class USceneComponent* AttachingPoint;
@@ -110,7 +110,7 @@ public:
 		class USkeletalMeshComponent* GetHandMesh();
 
 	UFUNCTION(BlueprintCallable, Category = "MotionController")
-		class USphereComponent* GetGrabSphere();
+		class USphereComponent* GetGripSphere();
 
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "VRTemplate|Variables", meta = (AllowPrivateAccess = "true"))

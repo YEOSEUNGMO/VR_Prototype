@@ -40,7 +40,7 @@ AVR_MotionController::AVR_MotionController()
 	MotionController = CreateDefaultSubobject<UMotionControllerComponent>(TEXT("MotionContoller"));
 	HandMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("HandMesh"));
 	DirectionPoint = CreateDefaultSubobject<USceneComponent>(TEXT("DirectionPoint"));
-	GrabSphere = CreateDefaultSubobject<USphereComponent>(TEXT("GrabSphere"));
+	GripSphere = CreateDefaultSubobject<USphereComponent>(TEXT("GripSphere"));
 	AttachingPoint = CreateDefaultSubobject<USceneComponent>(TEXT("AttachingPoint"));
 	static ConstructorHelpers::FObjectFinder<UHapticFeedbackEffect_Base> HapticEffect(TEXT("HapticFeedbackEffect_Curve'/Game/Graphics/VirtualRealityBP/Blueprints/MotionControllerHaptics.MotionControllerHaptics'"));
 
@@ -80,13 +80,13 @@ AVR_MotionController::AVR_MotionController()
 	AttachingPoint->SetupAttachment(HandMesh);
 	AttachingPoint->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
 
-	GrabSphere->SetupAttachment(HandMesh);
-	GrabSphere->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
-	GrabSphere->SetSphereRadius(10.0f);
-	GrabSphere->SetCollisionProfileName(TEXT("OverlapAllDynamic"));
-	GrabSphere->SetGenerateOverlapEvents(true);
-	GrabSphere->OnComponentBeginOverlap.AddDynamic(this, &AVR_MotionController::OnComponentBeginOverlap);
-	GrabSphere->OnComponentEndOverlap.AddDynamic(this, &AVR_MotionController::OnComponentEndOverlap);
+	GripSphere->SetupAttachment(HandMesh);
+	GripSphere->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
+	GripSphere->SetSphereRadius(10.0f);
+	GripSphere->SetCollisionProfileName(TEXT("OverlapAllDynamic"));
+	GripSphere->SetGenerateOverlapEvents(true);
+	GripSphere->OnComponentBeginOverlap.AddDynamic(this, &AVR_MotionController::OnComponentBeginOverlap);
+	GripSphere->OnComponentEndOverlap.AddDynamic(this, &AVR_MotionController::OnComponentEndOverlap);
 
 	if (HapticEffect.Succeeded())
 	{
@@ -138,6 +138,7 @@ void AVR_MotionController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+
 	UpdateHandAnimation();
 }
 
@@ -148,14 +149,14 @@ UPrimitiveComponent* AVR_MotionController::GetComponentNearHand() const
 
 	// Epic Comment :D // Filtered to StaticMeshes found in the level.
 	TArray<UPrimitiveComponent*> OverlapComponents;
-	GrabSphere->GetOverlappingComponents(OverlapComponents);
-	FVector GrabSphereLocation = GrabSphere->GetComponentLocation();
+	GripSphere->GetOverlappingComponents(OverlapComponents);
+	FVector GripSphereLocation = GripSphere->GetComponentLocation();
 
 	for (UPrimitiveComponent* Components : OverlapComponents)
 	{
 		if(Components->GetOwner()->GetClass()->ImplementsInterface(UIN_CatchableItem::StaticClass()))
 		{
-			float MyLength = (Components->GetComponentLocation() - GrabSphereLocation).Size();
+			float MyLength = (Components->GetComponentLocation() - GripSphereLocation).Size();
 
 			if (IIN_CatchableItem::Execute_IsCatchableComp(Components->GetOwner(), Components) && MyLength < NearestOverlap)
 			{
@@ -180,19 +181,19 @@ AActor*  AVR_MotionController::GetActorNearHand() const
 
 	// Epic Comment :D // Filtered to StaticMeshes found in the level.
 	TArray<AActor*> OverlapActors;
-	GrabSphere->GetOverlappingActors(OverlapActors);
-	FVector GrabSphereLocation = GrabSphere->GetComponentLocation();
+	GripSphere->GetOverlappingActors(OverlapActors);
+	FVector GripSphereLocation = GripSphere->GetComponentLocation();
 
 	for (AActor* Actors : OverlapActors)
 	{
 		 //Epic Comment :D // Filter to Actors that implement our interface for pickup/dropping
 		bool bHasInterface = Actors->GetClass()->ImplementsInterface(UIN_CatchableItem::StaticClass());
 
-		 //Epic Comment :D // We want to only grab simulated meshes.
+		 //Epic Comment :D // We want to only Grip simulated meshes.
 		if (bHasInterface)
 		{
-			float MyLength = (Actors->GetActorLocation() - GrabSphereLocation).Size();
-			// float MyLengthSquared = (Actors->GetActorLocation() - GrabSphereLocation).SizeSquared();
+			float MyLength = (Actors->GetActorLocation() - GripSphereLocation).Size();
+			// float MyLengthSquared = (Actors->GetActorLocation() - GripSphereLocation).SizeSquared();
 
 			if (MyLength < NearestOverlap)
 			{
@@ -215,8 +216,8 @@ void  AVR_MotionController::TriggerPull()
 	AActor* NearActor = nullptr;
 
 	/*디버그로 확인*/
-	/*if (NearComponent)
-		GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Yellow, NearComponent->GetName(), true, FVector2D(10.0f, 10.0f));*/
+	if (NearComponent)
+		GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Yellow, NearComponent->GetName(), true, FVector2D(10.0f, 10.0f));
 
 	if (NearComponent->IsValidLowLevel())
 	{
@@ -225,7 +226,6 @@ void  AVR_MotionController::TriggerPull()
 		{
 			if (ItemIn_Implementation(NearActor, NearComponent) && DropWhenReleased)
 			{
-				HandAnimation->setCurrentRifleGripState(ERifleGripState::MainGrip);
 				//GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Yellow, TEXT("ITEM IN!!"), true, FVector2D(10.0f, 10.0f));
 				//TriggerReleaseActions에 바인딩
 				TriggerReleaseActions.AddUObject(this, &AVR_MotionController::ItemDropByTrigger);
@@ -241,7 +241,6 @@ void  AVR_MotionController::TriggerPull()
 			if (bHasItemOwnerInterface)
 			{
 				IIN_ItemOwner::Execute_ItemIn(NearActor, CatchedComp->GetOwner(),CatchedComp);
-				HandAnimation->setCurrentRifleGripState(ERifleGripState::NoGrip);
 			}
 			else
 			{
@@ -379,7 +378,6 @@ void AVR_MotionController::OnComponentBeginOverlap(UPrimitiveComponent* Overlapp
 			if (HandOverlappedComps.AddUnique(OtherComp) == 0)
 			{
 				RumbleController(0.1f);
-				//StartRumbleController(0.1, true);
 			}
 		}
 		else
@@ -389,7 +387,6 @@ void AVR_MotionController::OnComponentBeginOverlap(UPrimitiveComponent* Overlapp
 				if (HandOverlappedComps.AddUnique(OtherComp) == 0)
 				{
 					RumbleController(0.1f);
-					//StartRumbleController(0.1, true);
 				}
 			}
 		}
@@ -412,54 +409,56 @@ void AVR_MotionController::OnComponentEndOverlap(UPrimitiveComponent* Overlapped
 
 void AVR_MotionController::UpdateHandAnimation()
 {
-	// Epic Comment :D // Update Animation of Hand
-	if (CatchedComp || bWantsToGrip)
-	{
-		//GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Red, TEXT("GRAB!!"), true, FVector2D(10.0f, 10.0f));
-		CurrentGripState = EGrip_Code::Grab;
-	}
-	else
-	{
-		AActor* NearActor = GetActorNearHand();
-
-		if (NearActor)
-		{
-			CurrentGripState = EGrip_Code::CanGrab;
-		}
-		else
-		{
-			if (bWantsToGrip)
-			{
-				CurrentGripState = EGrip_Code::Grab;
-				//GripValue = 1;
-			}
-			else
-			{
-				CurrentGripState = EGrip_Code::Open;
-				//GripValue = 0;
-			}
-		}
-	}
-
-	// Epic Comment :D // Update the animation state of the hand mesh.
 	UVR_HandAnimInstance* HandAnimation = Cast<UVR_HandAnimInstance>(HandMesh->GetAnimInstance());
-	HandAnimation->SetGripState(CurrentGripState);
-	if (CurrentGripState == EGrip_Code::Grab)
-	{
-		GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Yellow,TEXT("Grip!") , true, FVector2D(10.0f, 10.0f));
-	}
-	//HandAnimation->SetGripState(GripValue);
+	HandAnimation->SetGripValue(TriggerValue);
+	//// Epic Comment :D // Update Animation of Hand
+	//if (CatchedComp || bWantsToGrip)
+	//{
+	//	//GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Red, TEXT("Grip!!"), true, FVector2D(10.0f, 10.0f));
+	//	CurrentGripState = EGrip_Code::Grip;
+	//}
+	//else
+	//{
+	//	AActor* NearActor = GetActorNearHand();
 
-	// Epic Comment :D // Only let hand collide with environment while gripping
-	// SomWorks :D // Not Use Switch
-	if (CurrentGripState == EGrip_Code::Open || CurrentGripState == EGrip_Code::CanGrab)
-	{
-		HandMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	}
-	else if (CurrentGripState == EGrip_Code::Grab)
-	{
-		HandMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	}
+	//	if (NearActor)
+	//	{
+	//		CurrentGripState = EGrip_Code::CanGrip;
+	//	}
+	//	else
+	//	{
+	//		if (bWantsToGrip)
+	//		{
+	//			CurrentGripState = EGrip_Code::Grip;
+	//			//GripValue = 1;
+	//		}
+	//		else
+	//		{
+	//			CurrentGripState = EGrip_Code::Open;
+	//			//GripValue = 0;
+	//		}
+	//	}
+	//}
+
+	//// Epic Comment :D // Update the animation state of the hand mesh.
+	//UVR_HandAnimInstance* HandAnimation = Cast<UVR_HandAnimInstance>(HandMesh->GetAnimInstance());
+	//HandAnimation->SetGripState(CurrentGripState);
+	//if (CurrentGripState == EGrip_Code::Grip)
+	//{
+	//	GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Yellow,TEXT("Grip!") , true, FVector2D(10.0f, 10.0f));
+	//}
+	////HandAnimation->SetGripState(GripValue);
+
+	//// Epic Comment :D // Only let hand collide with environment while gripping
+	//// SomWorks :D // Not Use Switch
+	//if (CurrentGripState == EGrip_Code::Open || CurrentGripState == EGrip_Code::CanGrip)
+	//{
+	//	HandMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	//}
+	//else if (CurrentGripState == EGrip_Code::Grip)
+	//{
+	//	HandMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	//}
 }
 
 bool AVR_MotionController::ItemIn_Implementation(AActor* Actor, class USceneComponent* Component)
@@ -552,7 +551,7 @@ void AVR_MotionController::ReceiveTriggerPostion(float val)
 	{
 		if (TriggerValue < TriggerReleaseLimit)
 		{
-			CurrentGripState = EGrip_Code::Open;
+			//CurrentGripState = EGrip_Code::Open;
 			TriggerRelease();
 			TriggerState = false;
 		}
@@ -562,7 +561,7 @@ void AVR_MotionController::ReceiveTriggerPostion(float val)
 		if (TriggerValue >= TriggerPullLimit)
 		{
 			//GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Black, FString::Printf(TEXT("%f,%f"), TriggerValue, TriggerPullLimit), true, FVector2D(10.0f, 10.0f));
-			CurrentGripState = EGrip_Code::Grab;
+			//CurrentGripState = EGrip_Code::Grip;
 			TriggerPull();
 			TriggerState = true;
 		}
@@ -596,9 +595,9 @@ USkeletalMeshComponent* AVR_MotionController::GetHandMesh()
 	return HandMesh;
 }
 
-USphereComponent* AVR_MotionController::GetGrabSphere()
+USphereComponent* AVR_MotionController::GetGripSphere()
 {
-	return GrabSphere;
+	return GripSphere;
 }
 
 
