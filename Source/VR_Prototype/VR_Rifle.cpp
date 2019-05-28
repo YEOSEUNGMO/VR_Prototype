@@ -63,6 +63,8 @@ AVR_Rifle::AVR_Rifle()
 	MainHandBox = CreateDefaultSubobject<UBoxComponent>("MainHandBox");
 	//MainHandBox->SetupAttachment(RifleMesh);
 	MainHandBox->AttachTo(RifleMesh);
+	MainHandBox->SetRelativeLocation(FVector(-1.26f, 0.0f, -2.25f));
+	MainHandBox->SetRelativeScale3D(FVector(0.4f, 0.06f, 0.15f));
 	MainHandBox->BodyInstance.SetCollisionProfileName(TEXT("OverlapAllDynamic"));
 	MainHandBox->SetGenerateOverlapEvents(true);
 
@@ -74,8 +76,11 @@ AVR_Rifle::AVR_Rifle()
 	SubHandBox = CreateDefaultSubobject<UBoxComponent>("SubHandBox");
 	//SubHandBox->SetupAttachment(RifleMesh);
 	SubHandBox->AttachTo(RifleMesh);
+	SubHandBox->SetRelativeLocation(FVector(39.0f, 0.0f, 4.0f));
+	SubHandBox->SetRelativeScale3D(FVector(0.4f, 0.06f, 0.06f));
 	SubHandBox->BodyInstance.SetCollisionProfileName(TEXT("OverlapAllDynamic"));
 	SubHandBox->SetGenerateOverlapEvents(true);
+	SubHandBox->OnComponentBeginOverlap.AddDynamic(this, &AVR_Rifle::OnComponentBeginOverlap);
 
 	SubHandLocation = CreateDefaultSubobject<USceneComponent>("SubHandLocation");
 	SubHandLocation->SetupAttachment(RifleMesh);
@@ -538,7 +543,7 @@ USceneComponent* AVR_Rifle::Catched_Implementation(USceneComponent* ItemComponen
 		{
 			if (SubHandBox == ItemComponent)
 			{
-				GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Black,TEXT("SUBHAND"), true, FVector2D(10.0f, 10.0f));
+				GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Red,TEXT("SUBHAND"), true, FVector2D(10.0f, 10.0f));
 				SubHand = MotionController;
 
 				/*Then0*/
@@ -783,4 +788,10 @@ FTransform AVR_Rifle::InvertTransform(FTransform transform)
 	result.SetScale3D(FVector(1.0f, 1.0f, 1.0f));
 
 	return result;
+}
+
+void AVR_Rifle::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if(OtherComp)
+		GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Blue, OtherComp->GetName(), true, FVector2D(10.0f, 10.0f));
 }

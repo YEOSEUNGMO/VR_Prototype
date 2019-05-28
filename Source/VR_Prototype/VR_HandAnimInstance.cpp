@@ -27,7 +27,7 @@ UVR_HandAnimInstance::UVR_HandAnimInstance()
 
 void UVR_HandAnimInstance::SetGripValue(float val)
 {
-	GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Black, FString::SanitizeFloat(val), true, FVector2D(10.0f, 10.0f));
+	//GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Black, FString::SanitizeFloat(val), true, FVector2D(10.0f, 10.0f));
 	GripValue = val;
 }
 

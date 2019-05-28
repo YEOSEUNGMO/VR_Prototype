@@ -108,7 +108,9 @@ public:
 		void Shot();
 	UFUNCTION(BlueprintCallable, Category = "Rifle")
 		void TriggerReleased();
-	
+	UFUNCTION()
+		void OnComponentBeginOverlap(class UPrimitiveComponent* OverlappedComp, AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
 	UFUNCTION(BlueprintCallable, Category = "Rifle")
 		void SetGripState(ERifleGripState state);
 	UFUNCTION(BlueprintCallable, Category = "Rifle")

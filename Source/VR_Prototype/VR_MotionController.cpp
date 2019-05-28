@@ -216,8 +216,8 @@ void  AVR_MotionController::TriggerPull()
 	AActor* NearActor = nullptr;
 
 	/*디버그로 확인*/
-	if (NearComponent)
-		GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Yellow, NearComponent->GetName(), true, FVector2D(10.0f, 10.0f));
+	//if (NearComponent)
+		//GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Yellow, NearComponent->GetName(), true, FVector2D(10.0f, 10.0f));
 
 	if (NearComponent->IsValidLowLevel())
 	{
@@ -226,13 +226,11 @@ void  AVR_MotionController::TriggerPull()
 		{
 			if (ItemIn_Implementation(NearActor, NearComponent) && DropWhenReleased)
 			{
-				//GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Yellow, TEXT("ITEM IN!!"), true, FVector2D(10.0f, 10.0f));
-				//TriggerReleaseActions에 바인딩
 				TriggerReleaseActions.AddUObject(this, &AVR_MotionController::ItemDropByTrigger);
 			}
 			else
 			{
-				GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Red, TEXT("ITEM IN ERROR"), true, FVector2D(10.0f, 10.0f));
+				//GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Red, TEXT("ITEM IN ERROR"), true, FVector2D(10.0f, 10.0f));
 			}
 		}
 		else//무기를 장착 하고 있는 상태
@@ -244,7 +242,7 @@ void  AVR_MotionController::TriggerPull()
 			}
 			else
 			{
-				GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Red, TEXT("ITEM IN ERROR"), true, FVector2D(10.0f, 10.0f));
+				//GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Red, TEXT("ITEM IN ERROR"), true, FVector2D(10.0f, 10.0f));
 			}
 		}
 	}
@@ -371,7 +369,23 @@ void AVR_MotionController::StopRumbleController()
 // Epic Comment :D // Rumble Controller when overlapping valid StaticMesh
 void AVR_MotionController::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (CatchedComp->IsValidLowLevel())
+	if ((OtherComp != nullptr) && (OtherComp != GripSphere))
+	{
+
+		GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Blue, OtherComp->GetName(), true, FVector2D(10.0f, 10.0f));
+
+		// SomWorks :D // Cast the OverlapComponet to UStaticMeshComponent
+		UStaticMeshComponent* const MyOverlapComponent = Cast<UStaticMeshComponent>(OtherComp);
+
+
+		if (MyOverlapComponent && MyOverlapComponent->IsSimulatingPhysics())
+		{
+			GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Yellow, MyOverlapComponent->GetName(), true, FVector2D(10.0f, 10.0f));
+			RumbleController(0.8f);
+		}
+	}
+
+	/*if (CatchedComp->IsValidLowLevel())
 	{
 		if (CatchedComp->GetOwner()->IsValidLowLevel())
 		{
@@ -390,7 +404,7 @@ void AVR_MotionController::OnComponentBeginOverlap(UPrimitiveComponent* Overlapp
 				}
 			}
 		}
-	}
+	}*/
 }
 
 void AVR_MotionController::OnComponentEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
@@ -495,7 +509,6 @@ bool AVR_MotionController::ItemIn_Implementation(AActor* Actor, class USceneComp
 			RealCatchedComp = IIN_CatchableItem::Execute_Catched(Actor, Component, this, AttachingPoint, "", true);
 			if (RealCatchedComp->IsValidLowLevel())
 			{
-				GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Black, RealCatchedComp->GetName(), true, FVector2D(10.0f, 10.0f));
 				bHasCatchableItemInterface = RealCatchedComp->GetOwner()->GetClass()->ImplementsInterface(UIN_CatchableItem::StaticClass());
 				if (bHasCatchableItemInterface)
 				{
@@ -546,7 +559,6 @@ bool AVR_MotionController::ItemOut_Implementation(AActor* Actor)
 
 void AVR_MotionController::ReceiveTriggerPostion(float val)
 {
-	//GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Black, FString::SanitizeFloat(val) , true, FVector2D(10.0f, 10.0f));
 	if (TriggerState == true)
 	{
 		if (TriggerValue < TriggerReleaseLimit)
@@ -560,7 +572,6 @@ void AVR_MotionController::ReceiveTriggerPostion(float val)
 	{
 		if (TriggerValue >= TriggerPullLimit)
 		{
-			//GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Black, FString::Printf(TEXT("%f,%f"), TriggerValue, TriggerPullLimit), true, FVector2D(10.0f, 10.0f));
 			//CurrentGripState = EGrip_Code::Grip;
 			TriggerPull();
 			TriggerState = true;
