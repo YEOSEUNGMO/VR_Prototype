@@ -254,7 +254,7 @@ void AVR_MotionController::ItemDropByTrigger()
 {
 	if (CatchedComp != nullptr)
 	{
-		ItemOut(CatchedComp->GetOwner());
+		IIN_ItemOwner::Execute_ItemOut(this, CatchedComp->GetOwner());
 		//TriggerReleaseActions에 언바인딩
 		TriggerReleaseActions.RemoveAll(this);	
 	}
@@ -369,14 +369,14 @@ void AVR_MotionController::StopRumbleController()
 // Epic Comment :D // Rumble Controller when overlapping valid StaticMesh
 void AVR_MotionController::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if ((OtherComp != nullptr) && (OtherComp != GripSphere))
+	//if ((OtherComp != nullptr) && (OtherComp != GripSphere))
 	{
 
 		GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Blue, OtherComp->GetName(), true, FVector2D(10.0f, 10.0f));
 
 		// SomWorks :D // Cast the OverlapComponet to UStaticMeshComponent
-		UStaticMeshComponent* const MyOverlapComponent = Cast<UStaticMeshComponent>(OtherComp);
-
+		//UStaticMeshComponent* const MyOverlapComponent = Cast<UStaticMeshComponent>(OtherComp);
+		USceneComponent* const MyOverlapComponent = Cast<USceneComponent>(OtherComp);
 
 		if (MyOverlapComponent && MyOverlapComponent->IsSimulatingPhysics())
 		{

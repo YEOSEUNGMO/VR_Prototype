@@ -13,8 +13,6 @@ class VR_PROTOTYPE_API AVR_ItemHolder : public AActor ,public IIN_ItemOwner,publ
 {
 	GENERATED_BODY()
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ItemHolder", meta = (AllowPrivateAccess = "true"))
-		class UBoxComponent* ItemHolderCollision;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ItemHolder", meta = (AllowPrivateAccess = "true"))
 		bool DropWhenReleased;
@@ -30,6 +28,9 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ItemHolder", meta = (AllowPrivateAccess = "true"))
+		class UBoxComponent* ItemHolderCollision;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ItemHolder", meta = (AllowPrivateAccess = "true"))
 		class AActor* HoldingItem;
 

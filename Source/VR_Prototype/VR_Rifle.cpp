@@ -6,7 +6,6 @@
 #include "VR_HandAnimInstance.h"
 #include "VR_Projectile.h"
 #include "VR_RifleAnimInstance.h"
-#include "VR_RifleMagazine.h"
 #include "VR_HandAnimInstance.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Components/SceneComponent.h"
@@ -32,13 +31,14 @@ AVR_Rifle::AVR_Rifle()
 
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SK_Rifle(TEXT("SkeletalMesh'/Game/Graphics/Rifle/Rifle.Rifle'"));
 	static ConstructorHelpers::FObjectFinder<UClass> AnimBP_RifleAnimation(TEXT("AnimBlueprint'/Game/Graphics/Rifle/RifleBP.RifleBP_C'"));
-	RootScene = CreateDefaultSubobject<USceneComponent>(TEXT("RootScene"));
-	RootComponent = RootScene;
+	//RootScene = CreateDefaultSubobject<USceneComponent>(TEXT("RootScene"));
+	//RootComponent = RootScene;
 
+	RootComponent = RifleMesh;
 	RifleMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("RifleMesh"));
 	//RifleMesh->SetupAttachment(RootComponent);
-	RifleMesh->AttachTo(RootComponent);
-	RifleMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	//RifleMesh->AttachTo(RootComponent);
+	//RifleMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	//RifleMesh->SetRelativeLocation(FVector(20.0f, 00.0f, 0.0f));
 	RifleMesh->SetRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
 	RifleMesh->SetRelativeScale3D(FVector(1.0f, 1.0f, 1.0f));
@@ -74,13 +74,12 @@ AVR_Rifle::AVR_Rifle()
 	MainHandLocation->AttachTo(RifleMesh);
 
 	SubHandBox = CreateDefaultSubobject<UBoxComponent>("SubHandBox");
-	//SubHandBox->SetupAttachment(RifleMesh);
-	SubHandBox->AttachTo(RifleMesh);
+	SubHandBox->SetupAttachment(RifleMesh);
+	//SubHandBox->AttachTo(RifleMesh);
 	SubHandBox->SetRelativeLocation(FVector(39.0f, 0.0f, 4.0f));
 	SubHandBox->SetRelativeScale3D(FVector(0.4f, 0.06f, 0.06f));
 	SubHandBox->BodyInstance.SetCollisionProfileName(TEXT("OverlapAllDynamic"));
 	SubHandBox->SetGenerateOverlapEvents(true);
-	SubHandBox->OnComponentBeginOverlap.AddDynamic(this, &AVR_Rifle::OnComponentBeginOverlap);
 
 	SubHandLocation = CreateDefaultSubobject<USceneComponent>("SubHandLocation");
 	SubHandLocation->SetupAttachment(RifleMesh);
@@ -678,7 +677,7 @@ void AVR_Rifle::Shot()
 	/*Then 0*/
 	//spawnBullet = GetWorld()->SpawnActorDeferred<AVR_Projectile>(AVR_Projectile::StaticClass(), ProjSpawn->GetComponentTransform(), this, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
 	GetWorld()->SpawnActorDeferred<AVR_Projectile>(AVR_Projectile::StaticClass(), ProjSpawn->GetComponentTransform(), this, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
-	//사운드 출력
+	/*사운드 출력 추가!!*/
 
 	/*Then 1*/
 	IsReadyToShot = false;
@@ -788,10 +787,4 @@ FTransform AVR_Rifle::InvertTransform(FTransform transform)
 	result.SetScale3D(FVector(1.0f, 1.0f, 1.0f));
 
 	return result;
-}
-
-void AVR_Rifle::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	if(OtherComp)
-		GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Blue, OtherComp->GetName(), true, FVector2D(10.0f, 10.0f));
 }

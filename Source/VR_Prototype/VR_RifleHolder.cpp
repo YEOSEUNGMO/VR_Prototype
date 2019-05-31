@@ -2,6 +2,7 @@
 
 #include "VR_RifleHolder.h"
 #include "VR_Rifle.h"
+#include "Components/BoxComponent.h"
 #include "Engine/Engine.h"
 #include "Engine/World.h"
 #include "UObject/ConstructorHelpers.h"
@@ -9,6 +10,10 @@
 
 AVR_RifleHolder::AVR_RifleHolder()
 {
+	//ItemHolderCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("ItemHolder"));
+	////ItemHolderCollision->InitBoxExtent(FVector(10.0f, 10.0f, 10.0f));
+	//ItemHolderCollision->BodyInstance.SetCollisionProfileName("OverlapAllDynamic");
+
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	
@@ -31,9 +36,9 @@ void AVR_RifleHolder::makeItem()
 {
 	AActor* spawnActor;
 	const FTransform SpawnTransform = FTransform(FRotator(0.0f, 0.0f, 0.0f), FVector(0.0f, 0.0f, 0.0f), FVector(1.0f, 1.0f, 1.0f)); // = FTransform::Identity;
-	//FAttachmentTransformRules AttachRules(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::KeepWorld, false);
+	FActorSpawnParameters SpawnParams;
 	
-	spawnActor = GetWorld()->SpawnActorDeferred<AVR_Rifle>(AVR_Rifle::StaticClass(), SpawnTransform, this, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+	spawnActor = GetWorld()->SpawnActor<AVR_Rifle>(AVR_Rifle::StaticClass(), SpawnTransform, SpawnParams);
 	if (spawnActor)
 		ItemIn_Implementation(spawnActor, nullptr);		
 	else
