@@ -542,15 +542,14 @@ USceneComponent* AVR_Rifle::Catched_Implementation(USceneComponent* ItemComponen
 		{
 			if (SubHandBox == ItemComponent)
 			{
-				GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Red,TEXT("SUBHAND"), true, FVector2D(10.0f, 10.0f));
 				SubHand = MotionController;
 
 				/*Then0*/
-				SubHand->GetHandMesh()->AttachToComponent(RifleMesh, AttachRules);
+				SubHand->GetHandMesh()->AttachToComponent(RifleMesh, AttachRules, TEXT("SubHandposition"));
 
 				/*Then1*/
 				UVR_HandAnimInstance* HandAnimation = Cast<UVR_HandAnimInstance>(SubHand->GetHandMesh()->GetAnimInstance());
-				HandAnimation->setRifleGripped(true);
+				HandAnimation->setRifleSubGripped(true);
 				/*Then2*/
 				return SubHandBox;
 			}
@@ -672,11 +671,12 @@ void AVR_Rifle::Shot()
 {
 	//AActor* spawnBullet;
 	const FTransform SpawnTransform = FTransform(FRotator(0.0f, 0.0f, 0.0f), FVector(0.0f, 0.0f, 0.0f), FVector(1.0f, 1.0f, 1.0f)); // = FTransform::Identity;
-	//FAttachmentTransformRules AttachRules(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::KeepWorld, false);
+	FActorSpawnParameters SpawnParams;
 
+	GetWorld()->SpawnActor<AVR_Projectile>(AVR_Projectile::StaticClass(), ProjSpawn->GetComponentTransform(), SpawnParams);
 	/*Then 0*/
-	//spawnBullet = GetWorld()->SpawnActorDeferred<AVR_Projectile>(AVR_Projectile::StaticClass(), ProjSpawn->GetComponentTransform(), this, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
-	GetWorld()->SpawnActorDeferred<AVR_Projectile>(AVR_Projectile::StaticClass(), ProjSpawn->GetComponentTransform(), this, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+
+	//GetWorld()->SpawnActorDeferred<AVR_Projectile>(AVR_Projectile::StaticClass(), ProjSpawn->GetComponentTransform(), this, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
 	/*사운드 출력 추가!!*/
 
 	/*Then 1*/
@@ -769,7 +769,7 @@ void AVR_Rifle::BothGrip_Tick()
 	FVector temp3;
 	FRotator result;
 
-	temp1 = MainHand->GetDirectionPoint()->GetComponentLocation() - SubHand->GetDirectionPoint()->GetComponentLocation();
+	temp1 = SubHand->GetDirectionPoint()->GetComponentLocation() - MainHand->GetDirectionPoint()->GetComponentLocation();
 	temp2 = temp1.RotateAngleAxis(MainHand->GetDirectionPoint()->GetComponentRotation().Roll, MainHand->GetDirectionPoint()->GetForwardVector());
 	temp3 = temp2.RotateAngleAxis(MainHand->GetDirectionPoint()->GetComponentRotation().Yaw + HandRotDiff.Yaw, FVector(0.0f, 0.0f, -1.0f));
 	result = temp3.RotateAngleAxis(MainHand->GetDirectionPoint()->GetComponentRotation().Pitch + HandRotDiff.Pitch, FVector(0.0f, 1.0f, 0.0f)).Rotation();

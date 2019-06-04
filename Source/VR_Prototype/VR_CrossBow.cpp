@@ -21,7 +21,8 @@ AVR_CrossBow::AVR_CrossBow()
 
 
 	CrossBowMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("CrossBowMesh"));
-	CrossBowMesh->SetRelativeScale3D(FVector(1.0f, 1.0f, 1.0f));
+	CrossBowMesh->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
+	CrossBowMesh->SetRelativeScale3D(FVector(0.5f, 0.5f, 0.5f));
 	CrossBowMesh->SetCollisionProfileName(TEXT("NoCollision"));
 	CrossBowMesh->CastShadow = false;
 
@@ -46,13 +47,11 @@ AVR_CrossBow::AVR_CrossBow()
 	MainHandLocation->AttachTo(CrossBowMesh);
 
 	SubHandBox = CreateDefaultSubobject<UBoxComponent>("SubHandBox");
-	SubHandBox->SetupAttachment(CrossBowMesh);
-	//SubHandBox->AttachTo(RifleMesh);
+	SubHandBox->AttachTo(CrossBowMesh);
 	SubHandBox->SetRelativeLocation(FVector(51.63f, 0.0f, 2.0f));
 	SubHandBox->SetRelativeScale3D(FVector(0.28f, 0.06f, 0.09f));
 	SubHandBox->BodyInstance.SetCollisionProfileName(TEXT("OverlapAllDynamic"));
 	SubHandBox->SetGenerateOverlapEvents(true);
-	//SubHandBox->OnComponentBeginOverlap.AddDynamic(this, &AVR_Rifle::OnComponentBeginOverlap);
 
 	SubHandLocation = CreateDefaultSubobject<USceneComponent>("SubHandLocation");
 	SubHandLocation->SetRelativeLocation(FVector(50.05f, 0.0f, 1.0f));
@@ -117,8 +116,12 @@ void AVR_CrossBow::TryShot(float DeltaTime)
 
 void AVR_CrossBow::Shot()
 {
+	const FTransform SpawnTransform = FTransform(FRotator(0.0f, 0.0f, 0.0f), FVector(0.0f, 0.0f, 0.0f), FVector(1.0f, 1.0f, 1.0f)); // = FTransform::Identity;
+	FActorSpawnParameters SpawnParams;
 	/*Then 0*/
-	GetWorld()->SpawnActorDeferred<AVR_Projectile>(AVR_Projectile::StaticClass(), ProjSpawn->GetComponentTransform(), this, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+
+	GetWorld()->SpawnActor<AVR_Projectile>(AVR_Projectile::StaticClass(), ProjSpawn->GetComponentTransform(), SpawnParams);
+	//GetWorld()->SpawnActorDeferred<AVR_Projectile>(AVR_Projectile::StaticClass(), ProjSpawn->GetComponentTransform(), this, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
 	/*사운드 출력 추가!!*/
 
 	/*Then 1*/

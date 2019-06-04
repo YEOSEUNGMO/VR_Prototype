@@ -17,17 +17,17 @@ void UVR_RifleAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	Super::NativeUpdateAnimation(DeltaTime);
 
 	/*Then 0*/
-	if (TriggerPulled >= 0.0f)
-	{
-		TriggerPulled = TriggerPulled + (DeltaTime*(-100.0f));
-		if (TriggerPulled <= 0.0f)
-		{
-			TriggerPulled = 0.0f;
-			//TriggerWillBePushed = false;
-			//if(Rifle!=nullptr)
-				//Rifle->Shot();
-		}
-	}
+	//if (TriggerPulled >= 0.0f)
+	//{
+	//	TriggerPulled = TriggerPulled + (DeltaTime*(-100.0f));
+	//	if (TriggerPulled <= 0.0f)
+	//	{
+	//		TriggerPulled = 0.0f;
+	//		//TriggerWillBePushed = false;
+	//		//if(Rifle!=nullptr)
+	//			//Rifle->Shot();
+	//	}
+	//}
 }
 
 void UVR_RifleAnimInstance::setRifle(AVR_Rifle* val)

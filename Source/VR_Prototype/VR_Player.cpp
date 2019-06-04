@@ -11,8 +11,8 @@
 #include "VR_MotionController.h"
 #include "VR_ItemHolder.h"
 #include "VR_RifleHolder.h"
-#include "VR_Rifle.h"
-#include "Components/ChildActorComponent.h"
+#include "VR_CrossBowHolder.h"
+#include "Kismet/KismetMathLibrary.h"
 
 // Sets default values
 AVR_Player::AVR_Player()
@@ -32,9 +32,10 @@ AVR_Player::AVR_Player()
 	//RifleHolderComponent->SetupAttachment(VRCamera);
 	//RifleHolderComponent->SetRelativeLocation(FVector(-50.0f,0.0f,33.0f));
 
-	DefaultPlayerHeight = 100.0f;
+	DefaultPlayerHeight = 180.0f;
 	bUseControllerRollToRotate = false;
-
+	CBH_HeightPercent = 0.0f;
+	CBH_MinHeight = 65.0f;
 }
 
 // Called when the game starts or when spawned
@@ -86,9 +87,19 @@ void AVR_Player::BeginPlay()
 	RifleHolder = GetWorld()->SpawnActorDeferred<AVR_RifleHolder>(AVR_RifleHolder::StaticClass(), SpawnTransform, this, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
 	if (RifleHolder)
 	{
-		RifleHolder->FinishSpawning(SpawnTransform);
 		RifleHolder->AttachToComponent(VRCamera, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::KeepWorld, false));
 		RifleHolder->SetActorRelativeLocation(FVector(-50.0f, 0.0f, 33.0f));
+		RifleHolder->FinishSpawning(SpawnTransform);
+	}
+
+	CrossBowHolder = GetWorld()->SpawnActorDeferred<AVR_CrossBowHolder>(AVR_CrossBowHolder::StaticClass(), SpawnTransform, this, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+	if (CrossBowHolder)
+	{
+		CrossBowHolder->AttachToComponent(RootComponent, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::KeepWorld, false));
+		CrossBowHolder->SetActorRelativeLocation(FVector(3.61f, -18.4f, -3.35f));
+		CrossBowHolder->SetActorRelativeRotation(FRotator(0.0f, -80.0f, -40.0f));
+		CrossBowHolder->SetActorRelativeScale3D(FVector(0.65f, 0.12f, 0.21f));
+		CrossBowHolder->FinishSpawning(SpawnTransform);
 	}
 }
 
@@ -257,4 +268,23 @@ EThumbstick_Direction AVR_Player::ClassifyAngleUpAndDown(float angle)
 		return EThumbstick_Direction::Up;
 	else
 		return EThumbstick_Direction::Down;
+}
+
+void AVR_Player::SyncCrossBowHolder()
+{
+	FVector newVector;
+	newVector.X = VRCamera->GetComponentLocation().X;
+	newVector.Y = VRCamera->GetComponentLocation().Y;
+	newVector.Z = UKismetMathLibrary::FMax(CBH_HeightPercent * (VRCamera->GetComponentLocation().Z - CameraBase->GetComponentLocation().Z),CBH_MinHeight)+ CameraBase->GetComponentLocation().Z;
+
+	CrossBowHolder->SetActorLocation(newVector);
+
+	if (VRCamera->GetComponentRotation().Roll<90.0f && VRCamera->GetComponentRotation().Roll>-90.0f && VRCamera->GetComponentRotation().Pitch > -25.0f)
+	{
+		FRotator newRotator;
+		newRotator.Roll = CrossBowHolder->GetActorRotation().Roll;
+		newRotator.Pitch = CrossBowHolder->GetActorRotation().Pitch;
+		newRotator.Yaw = VRCamera->GetComponentRotation().Yaw;
+		CrossBowHolder->SetActorRotation(newRotator);
+	}
 }

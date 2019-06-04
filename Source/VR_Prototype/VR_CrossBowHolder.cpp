@@ -1,37 +1,35 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "VR_CrossBowHolder.h"
-#include "Components/BoxComponent.h"
-#include "Components/StaticMeshComponent.h"
-#include "UObject/ConstructorHelpers.h"
-#include "Components/SkeletalMeshComponent.h"
-
+#include "VR_CrossBow.h"
+#include "Engine/Engine.h"
+#include "Engine/World.h"
 
 AVR_CrossBowHolder::AVR_CrossBowHolder()
 {
-	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	ItemIsUnique = true;
+	HoldedWithVisible = true;
+	HoldingItem = nullptr;
+	ItemHolded = true;
+}
 
-	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SK_CrossBow(TEXT("SkeletalMesh'/Game/Graphics/CrossBosw/Crossbow.Crossbow'"));
+void AVR_CrossBowHolder::BeginPlay()
+{
+	Super::BeginPlay();
+	//GetWorldTimerManager().SetTimer(makeItemdelay, this, &AVR_ItemHolder::makeItem, 0.5f);
+	makeItem();
+}
 
-	CrossBowHolderCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("RifleHolder"));
-	CrossBowHolderCollision->InitBoxExtent(FVector(2.0f, 2.0f, 2.0f));
-	CrossBowHolderCollision->BodyInstance.SetCollisionProfileName("OverlapAllDynamic");
+void AVR_CrossBowHolder::makeItem()
+{
+	AActor* spawnActor;
+	const FTransform SpawnTransform = FTransform(FRotator(0.0f, -90.0f, 0.0f), FVector(0.0f, 0.0f, 0.0f), FVector(0.5f, 0.5f, 0.5f)); // = FTransform::Identity;
+	FActorSpawnParameters SpawnParams;
 
-	RootComponent = CrossBowHolderCollision;
+	spawnActor = GetWorld()->SpawnActor<AVR_CrossBow>(AVR_CrossBow::StaticClass(), SpawnTransform, SpawnParams);
+	if (spawnActor)
+		ItemIn_Implementation(spawnActor, nullptr);
+	else
+		GEngine->AddOnScreenDebugMessage(0, 2.0f, FColor::Red, TEXT("Spawn error"), true, FVector2D(10.0f, 10.0f));
 
-	Mesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("MeshComp"));
-	Mesh->AttachTo(CrossBowHolderCollision);
-	Mesh->SetCollisionProfileName(TEXT("NoCollision"));
-	Mesh->CastShadow = false;
-	Mesh->SetOnlyOwnerSee(true);
-	//CrossBowMesh->SetRelativeRotation(FRotator(90.0f, -90.0f, 0.0f));
-	//CrossBowMesh->SetRelativeScale3D(FVector(0.5f, 0.5f, 0.5f));
-
-	if (SK_CrossBow.Succeeded())
-	{
-		Mesh->SetSkeletalMesh(SK_CrossBow.Object);
-		Mesh->SetRelativeScale3D(FVector(0.5f, 0.5f, 0.5f));
-	}
-	
 }

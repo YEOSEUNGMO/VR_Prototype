@@ -44,7 +44,7 @@ class VR_PROTOTYPE_API UVR_HandAnimInstance : public UAnimInstance
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HandAnimation", meta = (AllowPrivateAccess = "true"))
 		bool ReturnToMain;
 public:
-	//virtual void NativeUpdateAnimation(float DeltaTime) override;
+	virtual void NativeUpdateAnimation(float DeltaTime) override;
 	UFUNCTION(BlueprintCallable, Category = "HandAnimation")
 		void SetGripState(EGrip_Code GripState);
 	UFUNCTION(BlueprintCallable, Category = "HandAnimation")

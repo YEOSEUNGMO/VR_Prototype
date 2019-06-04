@@ -216,16 +216,18 @@ void  AVR_MotionController::TriggerPull()
 	AActor* NearActor = nullptr;
 
 	/*디버그로 확인*/
-	//if (NearComponent)
-		//GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Yellow, NearComponent->GetName(), true, FVector2D(10.0f, 10.0f));
+	if (NearComponent)
+		GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Black, NearComponent->GetName(), true, FVector2D(10.0f, 10.0f));
 
 	if (NearComponent->IsValidLowLevel())
 	{
 		NearActor = NearComponent->GetOwner();
 		if (CatchedComp == nullptr)//손에 아무 무기를 장착하고 있지 않은 상태.
 		{
-			if (ItemIn_Implementation(NearActor, NearComponent) && DropWhenReleased)
+			//if (IIN_ItemOwner::Execute_ItemIn( ItemIn_Implementation(NearActor, NearComponent) && DropWhenReleased)
+			if (IIN_ItemOwner::Execute_ItemIn(this,NearActor, NearComponent) && DropWhenReleased)
 			{
+				GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Red, TEXT("ITEM IN OK"), true, FVector2D(10.0f, 10.0f));
 				TriggerReleaseActions.AddUObject(this, &AVR_MotionController::ItemDropByTrigger);
 			}
 			else
@@ -235,14 +237,17 @@ void  AVR_MotionController::TriggerPull()
 		}
 		else//무기를 장착 하고 있는 상태
 		{
+			AVR_ItemHolder* holder = Cast<AVR_ItemHolder>(NearComponent->GetOwner());
 			bool bHasItemOwnerInterface = NearActor->GetClass()->ImplementsInterface(UIN_ItemOwner::StaticClass());
+			//bool bHasItemOwnerInterface = holder->GetClass()->ImplementsInterface(UIN_ItemOwner::StaticClass());
 			if (bHasItemOwnerInterface)
 			{
-				IIN_ItemOwner::Execute_ItemIn(NearActor, CatchedComp->GetOwner(),CatchedComp);
+				IIN_ItemOwner::Execute_ItemIn(holder, CatchedComp->GetOwner(),CatchedComp);
 			}
 			else
 			{
-				//GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Red, TEXT("ITEM IN ERROR"), true, FVector2D(10.0f, 10.0f));
+				GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Blue, NearActor->GetClass()->GetName(), true, FVector2D(10.0f, 10.0f));
+				//GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Blue, TEXT("ITEM IN ERROR"), true, FVector2D(10.0f, 10.0f));
 			}
 		}
 	}
@@ -369,11 +374,9 @@ void AVR_MotionController::StopRumbleController()
 // Epic Comment :D // Rumble Controller when overlapping valid StaticMesh
 void AVR_MotionController::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	//if ((OtherComp != nullptr) && (OtherComp != GripSphere))
+	//GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Black, OtherComp->GetName(), true, FVector2D(10.0f, 10.0f));
+	if ((OtherComp != nullptr) && (OtherComp != GripSphere))
 	{
-
-		GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Blue, OtherComp->GetName(), true, FVector2D(10.0f, 10.0f));
-
 		// SomWorks :D // Cast the OverlapComponet to UStaticMeshComponent
 		//UStaticMeshComponent* const MyOverlapComponent = Cast<UStaticMeshComponent>(OtherComp);
 		USceneComponent* const MyOverlapComponent = Cast<USceneComponent>(OtherComp);

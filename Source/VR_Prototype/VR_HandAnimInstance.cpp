@@ -18,12 +18,12 @@ UVR_HandAnimInstance::UVR_HandAnimInstance()
 //	CurrentRifleGripState = val;
 //}
 
-//void UVR_HandAnimInstance::NativeUpdateAnimation(float DeltaTime)
-//{
-//	Super::NativeUpdateAnimation(DeltaTime);
-//	float TempGrip = UKismetMathLibrary::Conv_IntToFloat(UKismetMathLibrary::Conv_ByteToInt((uint8)CurrentGripState)) / 2;
-//	GripValue = FMath::FInterpConstantTo(GripValue, TempGrip, DeltaTime, InterpSpeed);
-//}
+void UVR_HandAnimInstance::NativeUpdateAnimation(float DeltaTime)
+{
+	Super::NativeUpdateAnimation(DeltaTime);
+	//float TempGrip = UKismetMathLibrary::Conv_IntToFloat(UKismetMathLibrary::Conv_ByteToInt((uint8)CurrentGripState)) / 2;
+	//GripValue = FMath::FInterpConstantTo(GripValue, TempGrip, DeltaTime, InterpSpeed);
+}
 
 void UVR_HandAnimInstance::SetGripValue(float val)
 {

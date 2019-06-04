@@ -23,8 +23,11 @@ class VR_PROTOTYPE_API AVR_Player : public APawn
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player", meta = (AllowPrivateAccess = "true"))
 		class AVR_ItemHolder* RifleHolder;
-	/*UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player", meta = (AllowPrivateAccess = "true"))
-		class UChildActorComponent* RifleHolderComponent;*/
+		//class AVR_RifleHolder* RifleHolder;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player", meta = (AllowPrivateAccess = "true"))
+		class AVR_CrossBowHolder* CrossBowHolder;
+
 public:
 	// Sets default values for this pawn's properties
 	AVR_Player();
@@ -54,15 +57,17 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player", meta = (AllowPrivateAccess = "true"))
 		class AVR_MotionController* RightController;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RifleHolder", meta = (AllowPrivateAccess = "true"))
-		class AVR_ItemHolder* CrossBowHolder;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player", meta = (AllowPrivateAccess = "true"))
 		float DefaultPlayerHeight;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player", meta = (AllowPrivateAccess = "true"))
 		bool bUseControllerRollToRotate;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player", meta = (AllowPrivateAccess = "true"))
+		float CBH_HeightPercent;	//CBHG=CrossBowHolder
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player", meta = (AllowPrivateAccess = "true"))
+		float CBH_MinHeight;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -74,5 +79,6 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	void SyncCrossBowHolder();
 
 };

@@ -2,10 +2,8 @@
 
 #include "VR_RifleHolder.h"
 #include "VR_Rifle.h"
-#include "Components/BoxComponent.h"
 #include "Engine/Engine.h"
 #include "Engine/World.h"
-#include "UObject/ConstructorHelpers.h"
 
 
 AVR_RifleHolder::AVR_RifleHolder()
