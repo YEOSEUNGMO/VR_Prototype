@@ -7,6 +7,8 @@
 #include "GameFramework/Pawn.h"
 #include "VR_Player.generated.h"
 
+DECLARE_MULTICAST_DELEGATE_OneParam(TickEventDelegate, float);
+
 UCLASS()
 class VR_PROTOTYPE_API AVR_Player : public APawn
 {
@@ -64,10 +66,10 @@ private:
 		bool bUseControllerRollToRotate;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player", meta = (AllowPrivateAccess = "true"))
-		float CBH_HeightPercent;	//CBHG=CrossBowHolder
+		float CrossBowHolder_HeightPercent;	//CBHG=CrossBowHolder
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player", meta = (AllowPrivateAccess = "true"))
-		float CBH_MinHeight;
+		float CrossBowHolder_MinHeight;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -76,9 +78,12 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	TickEventDelegate TickEvent;
+	FDelegateHandle TickEventHandle_SyncCrossBowHolder;
+
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	void SyncCrossBowHolder();
+	void SyncCrossBowHolder(float DeltaTime);
 
 };

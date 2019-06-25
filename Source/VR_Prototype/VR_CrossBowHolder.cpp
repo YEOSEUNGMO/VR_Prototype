@@ -23,7 +23,7 @@ void AVR_CrossBowHolder::BeginPlay()
 void AVR_CrossBowHolder::makeItem()
 {
 	AActor* spawnActor;
-	const FTransform SpawnTransform = FTransform(FRotator(0.0f, -90.0f, 0.0f), FVector(0.0f, 0.0f, 0.0f), FVector(0.5f, 0.5f, 0.5f)); // = FTransform::Identity;
+	const FTransform SpawnTransform = FTransform(FRotator(0.0f, 0.0f, 0.0f), FVector(0.0f, 0.0f, 0.0f), FVector(1.0f, 1.0f, 1.0f)); // = FTransform::Identity;
 	FActorSpawnParameters SpawnParams;
 
 	spawnActor = GetWorld()->SpawnActor<AVR_CrossBow>(AVR_CrossBow::StaticClass(), SpawnTransform, SpawnParams);

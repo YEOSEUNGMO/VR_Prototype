@@ -21,7 +21,7 @@ AVR_CrossBow::AVR_CrossBow()
 
 
 	CrossBowMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("CrossBowMesh"));
-	CrossBowMesh->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
+	CrossBowMesh->SetRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
 	CrossBowMesh->SetRelativeScale3D(FVector(0.5f, 0.5f, 0.5f));
 	CrossBowMesh->SetCollisionProfileName(TEXT("NoCollision"));
 	CrossBowMesh->CastShadow = false;
@@ -37,7 +37,7 @@ AVR_CrossBow::AVR_CrossBow()
 	//MainHandBox->SetupAttachment(RifleMesh);
 	MainHandBox->AttachTo(CrossBowMesh);
 	MainHandBox->SetRelativeLocation(FVector(3.08f, 0.0f, -0.31f));
-	MainHandBox->SetRelativeScale3D(FVector(0.28f, 0.06f, 0.21f));
+	MainHandBox->SetRelativeScale3D(FVector(0.06f, 0.28f, 0.21f));
 	MainHandBox->BodyInstance.SetCollisionProfileName(TEXT("OverlapAllDynamic"));
 	MainHandBox->SetGenerateOverlapEvents(true);
 
@@ -48,8 +48,8 @@ AVR_CrossBow::AVR_CrossBow()
 
 	SubHandBox = CreateDefaultSubobject<UBoxComponent>("SubHandBox");
 	SubHandBox->AttachTo(CrossBowMesh);
-	SubHandBox->SetRelativeLocation(FVector(51.63f, 0.0f, 2.0f));
-	SubHandBox->SetRelativeScale3D(FVector(0.28f, 0.06f, 0.09f));
+	SubHandBox->SetRelativeLocation(FVector(2.0f, 0.0f, 51.63f));
+	SubHandBox->SetRelativeScale3D(FVector(0.6f, 0.28f, 0.09f));
 	SubHandBox->BodyInstance.SetCollisionProfileName(TEXT("OverlapAllDynamic"));
 	SubHandBox->SetGenerateOverlapEvents(true);
 
