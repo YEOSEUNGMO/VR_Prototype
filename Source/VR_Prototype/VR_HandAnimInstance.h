@@ -30,7 +30,7 @@ class VR_PROTOTYPE_API UVR_HandAnimInstance : public UAnimInstance
 		bool RifleSubGripped;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HandAnimation", meta = (AllowPrivateAccess = "true"))
-		ERifleGripState CurrentRifleGripState;
+		EWeaponGripState CurrentRifleGripState;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HandAnimation", meta = (AllowPrivateAccess = "true"))
 		EGrip_Code CurrentGripState;
@@ -52,7 +52,7 @@ public:
 
 
 //	UFUNCTION(BlueprintCallable, Category = "MotionController")
-//		void setCurrentRifleGripState(ERifleGripState val);
+//		void setCurrentRifleGripState(EWeaponGripState val);
 
 	UFUNCTION(BlueprintCallable, Category = "MotionController")
 		void setuseOneHandReload(bool val);

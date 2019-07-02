@@ -8,6 +8,7 @@
 #include "VR_Projectile.h"
 #include "CoreMinimal.h"
 #include "VR_Weapon.h"
+#include "VR_DataTable.h"
 #include "VR_CrossBow.generated.h"
 
 /**
@@ -35,6 +36,10 @@ class VR_PROTOTYPE_API AVR_CrossBow : public AActor, public IIN_CatchableItem, p
 		float RechargingTime_Now;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "CrossBow", meta = (AllowPrivateAccess = "true"))
 		float RechargingTime_Need;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "CrossBow", meta = (AllowPrivateAccess = "true"))
+		FRotator HandRotDiff;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
+		EWeaponGripState GripState;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -64,7 +69,20 @@ public:
 		void AutoRecharge(float DeltaTime);
 	UFUNCTION(BlueprintCallable, Category = "CrossBow")
 		void Recharged();
-
+	UFUNCTION(BlueprintCallable, Category = "CrossBow")
+		void ClassifyState(float DeltaTime);
+	UFUNCTION(BlueprintCallable, Category = "CrossBow")
+		void SetGripState(EWeaponGripState state);
+	UFUNCTION(BlueprintCallable, Category = "CrossBow")
+		void MainGrip_Enter();
+	UFUNCTION(BlueprintCallable, Category = "CrossBow")
+		void BothGrip_Enter();
+	UFUNCTION(BlueprintCallable, Category = "CrossBow")
+		void MainGrip_Tick();
+	UFUNCTION(BlueprintCallable, Category = "CrossBow")
+		void BothGrip_Tick();
+	UFUNCTION(BlueprintCallable, Category = "CrossBow")
+		FTransform InvertTransform(FTransform transform);
 	UFUNCTION(BlueprintCallable, Category = "CrossBow")
 		void TriggerPulled();
 	UFUNCTION(BlueprintCallable, Category = "CrossBow")
@@ -78,6 +96,7 @@ public:
 		void DrawAimLine(float DeltaTime);
 
 	TickEventDelegate TickEvent;
+	FDelegateHandle TickEventHandle_ClassifyState;
 	FDelegateHandle TickEventHandle_AutoRecharge;
 	FDelegateHandle TickEventHandle_DrawAimLine;
 	FDelegateHandle TickEventHandle_TryShot;

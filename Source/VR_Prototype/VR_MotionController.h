@@ -63,8 +63,8 @@ public:
 
 	UFUNCTION()
 		void OnComponentBeginOverlap(class UPrimitiveComponent* OverlappedComp, AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-	UFUNCTION()
-		void OnComponentEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	//UFUNCTION()
+		//void OnComponentEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 	//UFUNCTION()
 	//	void OnComponentHitOverlap(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
@@ -108,6 +108,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "MotionController")
 		class USkeletalMeshComponent* GetHandMesh();
+
+	UFUNCTION(BlueprintCallable, Category = "MotionController")
+		class USceneComponent* GetCatchedComp();
 
 	UFUNCTION(BlueprintCallable, Category = "MotionController")
 		class USphereComponent* GetGripSphere();

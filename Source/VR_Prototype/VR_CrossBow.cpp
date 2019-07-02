@@ -10,6 +10,8 @@
 #include "Components/BoxComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "TimerManager.h"
+#include "Engine/Engine.h"
+#include "Kismet/KismetMathLibrary.h"
 
 // Sets default values
 AVR_CrossBow::AVR_CrossBow()
@@ -17,12 +19,12 @@ AVR_CrossBow::AVR_CrossBow()
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SK_CrossBow(TEXT("SkeletalMesh'/Game/Graphics/CrossBosw/Crossbow.Crossbow'"));
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SK_CrossBow(TEXT("SkeletalMesh'/Game/Graphics/New/Objects/_CrossBow/Object/Mesh/Crossgun.Crossgun'"));
 
 
 	CrossBowMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("CrossBowMesh"));
 	CrossBowMesh->SetRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
-	CrossBowMesh->SetRelativeScale3D(FVector(0.5f, 0.5f, 0.5f));
+	CrossBowMesh->SetRelativeScale3D(FVector(1.0f, 1.0f, 1.0f));
 	CrossBowMesh->SetCollisionProfileName(TEXT("NoCollision"));
 	CrossBowMesh->CastShadow = false;
 
@@ -36,8 +38,8 @@ AVR_CrossBow::AVR_CrossBow()
 	MainHandBox = CreateDefaultSubobject<UBoxComponent>("MainHandBox");
 	//MainHandBox->SetupAttachment(RifleMesh);
 	MainHandBox->AttachTo(CrossBowMesh);
-	MainHandBox->SetRelativeLocation(FVector(3.08f, 0.0f, -0.31f));
-	MainHandBox->SetRelativeScale3D(FVector(0.06f, 0.28f, 0.21f));
+	MainHandBox->SetRelativeLocation(FVector(3.08f, 0.0f, -0.21f));
+	MainHandBox->SetRelativeScale3D(FVector(0.28f, 0.06f, 0.21f));
 	MainHandBox->BodyInstance.SetCollisionProfileName(TEXT("OverlapAllDynamic"));
 	MainHandBox->SetGenerateOverlapEvents(true);
 
@@ -48,8 +50,8 @@ AVR_CrossBow::AVR_CrossBow()
 
 	SubHandBox = CreateDefaultSubobject<UBoxComponent>("SubHandBox");
 	SubHandBox->AttachTo(CrossBowMesh);
-	SubHandBox->SetRelativeLocation(FVector(2.0f, 0.0f, 51.63f));
-	SubHandBox->SetRelativeScale3D(FVector(0.6f, 0.28f, 0.09f));
+	SubHandBox->SetRelativeLocation(FVector(51.63f, 0.0f, 2.0f));
+	SubHandBox->SetRelativeScale3D(FVector(0.28f, 0.06f, 0.09f));
 	SubHandBox->BodyInstance.SetCollisionProfileName(TEXT("OverlapAllDynamic"));
 	SubHandBox->SetGenerateOverlapEvents(true);
 
@@ -67,13 +69,18 @@ AVR_CrossBow::AVR_CrossBow()
 	SubHandIsInRange = false;
 	RechargingTime_Now = 0.0f;
 	RechargingTime_Need = 0.125f;
+	GripState = EWeaponGripState::NoGrip;
 
 }
 void AVR_CrossBow::BeginPlay()
 {
 	Super::BeginPlay();
+	TickEventHandle_ClassifyState = TickEvent.AddUObject(this, &AVR_CrossBow::ClassifyState);
 	TickEventHandle_AutoRecharge = TickEvent.AddUObject(this, &AVR_CrossBow::AutoRecharge);
 	TickEventHandle_DrawAimLine = TickEvent.AddUObject(this, &AVR_CrossBow::DrawAimLine);
+	FVector MainHandRelativeLocation = GetTransform().InverseTransformPosition(MainHandLocation->GetComponentLocation());
+	FVector SubHandRelativeLocation = GetTransform().InverseTransformPosition(SubHandLocation->GetComponentLocation());
+	HandRotDiff = UKismetMathLibrary::MakeRotFromX(SubHandRelativeLocation - MainHandRelativeLocation);
 }
 
 void AVR_CrossBow::AutoRecharge(float DeltaTime)
@@ -91,6 +98,104 @@ void AVR_CrossBow::AutoRecharge(float DeltaTime)
 void AVR_CrossBow::Recharged()
 {
 	IsReadyToShot = true;
+}
+
+void AVR_CrossBow::ClassifyState(float DeltaTime)
+{
+	if (MainHand != nullptr || SubHand != nullptr)
+	{
+		if (MainHand != nullptr && SubHand != nullptr)
+		{
+			SetGripState(EWeaponGripState::BothGrip);
+		}
+		else
+		{
+			if (MainHand != nullptr)
+			{
+				SetGripState(EWeaponGripState::MainGrip);
+			}
+			else
+			{
+				SetGripState(EWeaponGripState::SubGrip);
+			}
+		}
+	}
+	else
+	{
+		SetGripState(EWeaponGripState::NoGrip);
+	}
+}
+
+void AVR_CrossBow::SetGripState(EWeaponGripState state)
+{
+	/*Then 0*/
+	if (GripState != state)
+	{
+		switch (state)
+		{
+		case EWeaponGripState::MainGrip:
+			MainGrip_Enter();
+			break;
+		case EWeaponGripState::BothGrip:
+			BothGrip_Enter();
+			break;
+		}
+		GripState = state;
+	}
+
+	/*Then 1*/
+	switch (state)
+	{
+	case EWeaponGripState::MainGrip:
+		MainGrip_Tick();
+		break;
+	case EWeaponGripState::BothGrip:
+		BothGrip_Tick();
+		break;
+	}
+}
+
+void AVR_CrossBow::MainGrip_Enter()
+{
+	SetActorRelativeTransform(InvertTransform(MainHandLocation->GetRelativeTransform()));
+	MainHand->GetHandMesh()->SetRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
+}
+
+void AVR_CrossBow::BothGrip_Enter()
+{
+
+}
+
+void AVR_CrossBow::MainGrip_Tick()
+{
+
+}
+
+void AVR_CrossBow::BothGrip_Tick()
+{
+	FVector temp1;
+	FVector temp2;
+	FVector temp3;
+	FRotator result;
+
+	temp1 = SubHand->GetDirectionPoint()->GetComponentLocation() - MainHand->GetDirectionPoint()->GetComponentLocation();
+	temp2 = temp1.RotateAngleAxis(MainHand->GetDirectionPoint()->GetComponentRotation().Roll, MainHand->GetDirectionPoint()->GetForwardVector());
+	temp3 = temp2.RotateAngleAxis(MainHand->GetDirectionPoint()->GetComponentRotation().Yaw + HandRotDiff.Yaw, FVector(0.0f, 0.0f, -1.0f));
+	result = temp3.RotateAngleAxis(MainHand->GetDirectionPoint()->GetComponentRotation().Pitch + HandRotDiff.Pitch, FVector(0.0f, 1.0f, 0.0f)).Rotation();
+
+	result.Roll = 0.0f;
+	MainHand->GetHandMesh()->SetRelativeRotation(result);
+}
+
+FTransform AVR_CrossBow::InvertTransform(FTransform transform)
+{
+	FTransform result;
+
+	result.SetLocation((FVector(0.0f, 0.0f, 0.0f) - transform.GetLocation()));
+	result.SetRotation((FQuat(0.0f, 0.0f, 0.0f, 0.0f) - transform.GetRotation()));
+	result.SetScale3D(FVector(1.0f, 1.0f, 1.0f));
+
+	return result;
 }
 
 // Called every frame
@@ -121,7 +226,7 @@ void AVR_CrossBow::Shot()
 	/*Then 0*/
 
 	GetWorld()->SpawnActor<AVR_Projectile>(AVR_Projectile::StaticClass(), ProjSpawn->GetComponentTransform(), SpawnParams);
-	//GetWorld()->SpawnActorDeferred<AVR_Projectile>(AVR_Projectile::StaticClass(), ProjSpawn->GetComponentTransform(), this, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+	
 	/*사운드 출력 추가!!*/
 
 	/*Then 1*/
@@ -242,7 +347,7 @@ USceneComponent* AVR_CrossBow::Catched_Implementation(class USceneComponent* Ite
 		}
 		else
 		{
-			if (SubHandBox == nullptr)
+			if (SubHandBox == ItemComponent)
 			{
 				SubHand = MotionController;
 				/*Then 0*/
@@ -257,7 +362,7 @@ USceneComponent* AVR_CrossBow::Catched_Implementation(class USceneComponent* Ite
 			}
 			else
 			{
-				if (MainHandBox == nullptr)
+				if (MainHandBox == ItemComponent)
 				{
 					MainHand = MotionController;
 					HoldingOwner = MainHand;
@@ -342,7 +447,7 @@ bool AVR_CrossBow::IsCatchableComp_Implementation(USceneComponent* SelectedCompo
 	}
 	else
 	{
-		if (MainHandBox == nullptr)
+		if (MainHandBox == SelectedComponent)
 		{
 			return true;
 		}

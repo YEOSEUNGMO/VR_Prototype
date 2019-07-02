@@ -86,7 +86,7 @@ AVR_MotionController::AVR_MotionController()
 	GripSphere->SetCollisionProfileName(TEXT("OverlapAllDynamic"));
 	GripSphere->SetGenerateOverlapEvents(true);
 	GripSphere->OnComponentBeginOverlap.AddDynamic(this, &AVR_MotionController::OnComponentBeginOverlap);
-	GripSphere->OnComponentEndOverlap.AddDynamic(this, &AVR_MotionController::OnComponentEndOverlap);
+	//GripSphere->OnComponentEndOverlap.AddDynamic(this, &AVR_MotionController::OnComponentEndOverlap);
 
 	if (HapticEffect.Succeeded())
 	{
@@ -154,21 +154,27 @@ UPrimitiveComponent* AVR_MotionController::GetComponentNearHand() const
 
 	for (UPrimitiveComponent* Components : OverlapComponents)
 	{
-		if(Components->GetOwner()->GetClass()->ImplementsInterface(UIN_CatchableItem::StaticClass()))
+		if (CatchedComp == nullptr || Components->GetOwner()!=CatchedComp->GetOwner())
 		{
-			float MyLength = (Components->GetComponentLocation() - GripSphereLocation).Size();
-
-			if (IIN_CatchableItem::Execute_IsCatchableComp(Components->GetOwner(), Components) && MyLength < NearestOverlap)
+			if (Components->GetOwner()->GetClass()->ImplementsInterface(UIN_CatchableItem::StaticClass()))
 			{
-				NearestOverlappingComponent = Components;
-				NearestOverlap = MyLength;
+				float MyLength = (Components->GetComponentLocation() - GripSphereLocation).Size();
+
+				if (IIN_CatchableItem::Execute_IsCatchableComp(Components->GetOwner(), Components) && MyLength < NearestOverlap)
+				{
+					NearestOverlappingComponent = Components;
+					NearestOverlap = MyLength;
+				}
+			}
+			else
+			{
+				//GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Yellow, TEXT("Iter_Error"), true, FVector2D(10.0f, 10.0f));
 			}
 		}
 		else
 		{
-			GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Yellow, TEXT("Iter_Error"), true, FVector2D(10.0f, 10.0f));
-		}
 
+		}
 	}
 
 	return NearestOverlappingComponent;
@@ -227,7 +233,6 @@ void  AVR_MotionController::TriggerPull()
 			//if (IIN_ItemOwner::Execute_ItemIn( ItemIn_Implementation(NearActor, NearComponent) && DropWhenReleased)
 			if (IIN_ItemOwner::Execute_ItemIn(this,NearActor, NearComponent) && DropWhenReleased)
 			{
-				GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Red, TEXT("ITEM IN OK"), true, FVector2D(10.0f, 10.0f));
 				TriggerReleaseActions.AddUObject(this, &AVR_MotionController::ItemDropByTrigger);
 			}
 			else
@@ -239,15 +244,13 @@ void  AVR_MotionController::TriggerPull()
 		{
 			AVR_ItemHolder* holder = Cast<AVR_ItemHolder>(NearComponent->GetOwner());
 			bool bHasItemOwnerInterface = NearActor->GetClass()->ImplementsInterface(UIN_ItemOwner::StaticClass());
-			//bool bHasItemOwnerInterface = holder->GetClass()->ImplementsInterface(UIN_ItemOwner::StaticClass());
 			if (bHasItemOwnerInterface)
 			{
 				IIN_ItemOwner::Execute_ItemIn(holder, CatchedComp->GetOwner(),CatchedComp);
 			}
 			else
 			{
-				GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Blue, NearActor->GetClass()->GetName(), true, FVector2D(10.0f, 10.0f));
-				//GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Blue, TEXT("ITEM IN ERROR"), true, FVector2D(10.0f, 10.0f));
+				GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Blue, NearComponent->GetClass()->GetName(), true, FVector2D(10.0f, 10.0f));
 			}
 		}
 	}
@@ -374,51 +377,26 @@ void AVR_MotionController::StopRumbleController()
 // Epic Comment :D // Rumble Controller when overlapping valid StaticMesh
 void AVR_MotionController::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	//&& (OtherComp != GripSphere)
-	//GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Black, OtherComp->GetName(), true, FVector2D(10.0f, 10.0f));
-	if ((OtherComp != nullptr) )
+	if ((OtherComp != nullptr) && (OtherComp != GripSphere))
 	{
 		// SomWorks :D // Cast the OverlapComponet to UStaticMeshComponent
-		//UStaticMeshComponent* const MyOverlapComponent = Cast<UStaticMeshComponent>(OtherComp);
 		USceneComponent* const MyOverlapComponent = Cast<USceneComponent>(OtherComp);
 
 		if (MyOverlapComponent && MyOverlapComponent->IsSimulatingPhysics())
 		{
-			//GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Yellow, MyOverlapComponent->GetName(), true, FVector2D(10.0f, 10.0f));
 			RumbleController(0.8f);
 		}
 	}
-
-	/*if (CatchedComp->IsValidLowLevel())
-	{
-		if (CatchedComp->GetOwner()->IsValidLowLevel())
-		{
-			if (HandOverlappedComps.AddUnique(OtherComp) == 0)
-			{
-				RumbleController(0.1f);
-			}
-		}
-		else
-		{
-			if (OtherActor != nullptr)
-			{
-				if (HandOverlappedComps.AddUnique(OtherComp) == 0)
-				{
-					RumbleController(0.1f);
-				}
-			}
-		}
-	}*/
 }
 
-void AVR_MotionController::OnComponentEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
-{
-	HandOverlappedComps.Remove(OtherComp);
-	if (HandOverlappedComps.Num() == 0)
-	{
-		StopRumbleController();
-	}
-}
+//void AVR_MotionController::OnComponentEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+//{
+//	HandOverlappedComps.Remove(OtherComp);
+//	if (HandOverlappedComps.Num() == 0)
+//	{
+//		StopRumbleController();
+//	}
+//}
 
 //void AVR_MotionController::OnComponentHitOverlap(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 //{
@@ -610,6 +588,11 @@ USceneComponent* AVR_MotionController::GetAttachingPoint()
 USkeletalMeshComponent* AVR_MotionController::GetHandMesh()
 {
 	return HandMesh;
+}
+
+USceneComponent* AVR_MotionController::GetCatchedComp()
+{
+	return CatchedComp;
 }
 
 USphereComponent* AVR_MotionController::GetGripSphere()

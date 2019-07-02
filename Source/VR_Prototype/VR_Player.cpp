@@ -5,6 +5,8 @@
 #include "Components/InputComponent.h"
 #include "Components/SceneComponent.h"
 #include "Components/BoxComponent.h"
+#include "Components/SphereComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "Engine/Engine.h"
 #include "MotionControllerComponent.h"
 #include "HeadMountedDisplayFunctionLibrary.h"
@@ -23,19 +25,25 @@ AVR_Player::AVR_Player()
 	RootScene = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
 	CameraBase = CreateDefaultSubobject<USceneComponent>(TEXT("VROrigin"));
 	VRCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
-	//RifleHolderComponent = CreateDefaultSubobject<UChildActorComponent>(TEXT("RifleHolderComponent"));
+	MainHandFixSphere = CreateDefaultSubobject<USphereComponent>(TEXT("MainHandFixedSphere"));
+	SubHandFixSphere = CreateDefaultSubobject<USphereComponent>(TEXT("SubHandFixedSphere"));
 
 	RootComponent = RootScene;
 	CameraBase->SetupAttachment(RootComponent);
 	VRCamera->SetupAttachment(CameraBase);
-
-	//RifleHolderComponent->SetupAttachment(VRCamera);
-	//RifleHolderComponent->SetRelativeLocation(FVector(-50.0f,0.0f,33.0f));
+	MainHandFixSphere->SetupAttachment(VRCamera);
+	MainHandFixSphere->OnComponentBeginOverlap.AddDynamic(this, &AVR_Player::MainHandFixSphereBeginOverlap);
+	MainHandFixSphere->OnComponentEndOverlap.AddDynamic(this, &AVR_Player::MainHandFixSphereEndOverlap);
+	SubHandFixSphere->SetupAttachment(VRCamera);
+	SubHandFixSphere->OnComponentBeginOverlap.AddDynamic(this, &AVR_Player::SubHandFixSphereBeginOverlap);
+	SubHandFixSphere->OnComponentEndOverlap.AddDynamic(this, &AVR_Player::SubHandFixSphereEndOverlap);
 
 	DefaultPlayerHeight = 180.0f;
 	bUseControllerRollToRotate = false;
 	CrossBowHolder_HeightPercent = 0.0f;
-	CrossBowHolder_MinHeight = -50.0f;
+	CrossBowHolder_MinHeight = -65.0f;
+	MainHand = nullptr;
+	SubHand = nullptr;
 }
 
 // Called when the game starts or when spawned
@@ -97,12 +105,13 @@ void AVR_Player::BeginPlay()
 	{
 		CrossBowHolder->AttachToComponent(CameraBase, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::KeepWorld, false));
 		CrossBowHolder->SetActorRelativeLocation(FVector(10.0f, -80.0f, -10.0f));
-		CrossBowHolder->SetActorRelativeRotation(FRotator(0.0f, 180.0f, 90.0f));
-		CrossBowHolder->SetActorRelativeScale3D(FVector(0.65f, 0.12f, 0.21f));
+		CrossBowHolder->SetActorRelativeRotation(FRotator(-90.0f, 90.0f, 180.0f));
+		CrossBowHolder->SetActorRelativeScale3D(FVector(0.30f, 0.12f, 0.21f));
 		CrossBowHolder->FinishSpawning(SpawnTransform);
 	}
 
 	TickEventHandle_SyncCrossBowHolder = TickEvent.AddUObject(this, &AVR_Player::SyncCrossBowHolder);
+	TickEventHandle_WeaponFix = TickEvent.AddUObject(this, &AVR_Player::WeaponFix);
 }
 
 // Called every frame
@@ -282,12 +291,77 @@ void AVR_Player::SyncCrossBowHolder(float DeltaTime)
 	newVector.Z = CrossBowHolder_MinHeight + VRCamera->GetComponentLocation().Z;
 	CrossBowHolder->SetActorLocation(newVector);
 
-	if (VRCamera->GetComponentRotation().Roll<90.0f && VRCamera->GetComponentRotation().Roll>-90.0f && VRCamera->GetComponentRotation().Pitch > -25.0f)
+	/*if (VRCamera->GetComponentRotation().Roll<90.0f && VRCamera->GetComponentRotation().Roll>-90.0f && VRCamera->GetComponentRotation().Pitch > -25.0f)
 	{
 		FRotator newRotator;
 		newRotator.Roll = CrossBowHolder->GetActorRotation().Roll;
 		newRotator.Pitch = CrossBowHolder->GetActorRotation().Pitch;
-		newRotator.Yaw = 180.0f+VRCamera->GetComponentRotation().Yaw;
+		newRotator.Yaw = VRCamera->GetComponentRotation().Yaw;
 		CrossBowHolder->SetActorRotation(newRotator);
+	}*/
+}
+
+void AVR_Player::MainHandFixSphereBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (OtherActor == RightController || OtherActor == LeftController)
+	{
+		MainHand = Cast<AVR_MotionController>(OtherActor);
+		if (MainHand->GetCatchedComp() != nullptr)
+		{
+			MainHandFixed = true;
+		}
+	}
+}
+
+void AVR_Player::MainHandFixSphereEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	if (OtherActor == RightController || OtherActor == LeftController)
+	{
+		MainHandFixed = false;
+		MainHand = nullptr;
+	}
+}
+
+void AVR_Player::SubHandFixSphereBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (OtherActor == RightController || OtherActor == LeftController)
+	{
+		SubHand = Cast<AVR_MotionController>(OtherActor);
+		if (SubHand->GetCatchedComp() != nullptr)
+		{
+			SubHandFixed = true;
+		}
+	}
+}
+
+void AVR_Player::SubHandFixSphereEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	if (OtherActor == RightController || OtherActor == LeftController)
+	{
+		SubHandFixed = false;
+		SubHand = nullptr;
+	}
+}
+
+void AVR_Player::WeaponFix(float DeltaTime)
+{
+	FDetachmentTransformRules DetachRules(EDetachmentRule::KeepWorld, EDetachmentRule::KeepWorld, EDetachmentRule::KeepWorld, true);
+	FAttachmentTransformRules AttachRules(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::KeepWorld, true);
+	if (MainHand != nullptr && SubHand != nullptr)
+	{
+		if (MainHandFixed && SubHandFixed && MainHand->GetCatchedComp() != nullptr && SubHand->GetCatchedComp() != nullptr)
+		{
+			GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Yellow, TEXT("@@@@@@@"), true, FVector2D(10.0f, 10.0f));
+			MainHand->GetHandMesh()->AttachToComponent(MainHandFixSphere, AttachRules);
+			SubHand->GetHandMesh()->AttachToComponent(SubHandFixSphere, AttachRules);
+		}
+
+		else
+		{
+			MainHand->GetHandMesh()->DetachFromComponent(DetachRules);
+			MainHand->GetHandMesh()->AttachToComponent(MainHand->GetRotateDummy(), AttachRules);
+			SubHand->GetHandMesh()->DetachFromComponent(DetachRules);
+			SubHand->GetHandMesh()->AttachToComponent(SubHand->GetRotateDummy(), AttachRules);
+		}
 	}
 }

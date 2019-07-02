@@ -44,7 +44,7 @@ class VR_PROTOTYPE_API AVR_Rifle : public AActor, public IIN_CatchableItem,publi
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
 		bool BottomButtonPressed;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
-		ERifleGripState GripState;
+		EWeaponGripState GripState;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
 		int Overload_Limit = 4;//과부하 한계
 	//UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Rifle", meta = (AllowPrivateAccess = "true"))
@@ -110,7 +110,7 @@ public:
 		void TriggerReleased();
 	
 	UFUNCTION(BlueprintCallable, Category = "Rifle")
-		void SetGripState(ERifleGripState state);
+		void SetGripState(EWeaponGripState state);
 	UFUNCTION(BlueprintCallable, Category = "Rifle")
 		void MainGrip_Enter();
 	UFUNCTION(BlueprintCallable, Category = "Rifle")

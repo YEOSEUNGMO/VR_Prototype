@@ -10,10 +10,10 @@ UVR_HandAnimInstance::UVR_HandAnimInstance()
 	InterpSpeed = 7.0f;
 	RifleGripped = false;
 	CurrentGripState = EGrip_Code::Open;
-	CurrentRifleGripState = ERifleGripState::NoGrip;
+	CurrentRifleGripState = EWeaponGripState::NoGrip;
 }
 
-//void UVR_HandAnimInstance::setCurrentRifleGripState(ERifleGripState val)
+//void UVR_HandAnimInstance::setCurrentRifleGripState(EWeaponGripState val)
 //{
 //	CurrentRifleGripState = val;
 //}

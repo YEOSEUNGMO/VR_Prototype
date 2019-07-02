@@ -139,7 +139,7 @@ AVR_Rifle::AVR_Rifle()
 	IsReadyToShot = false;
 	//IsReloading = false;
 	BottomButtonPressed = false;
-	GripState = ERifleGripState::NoGrip;
+	GripState = EWeaponGripState::NoGrip;
 	HoldingOwner = nullptr;
 }
 
@@ -200,23 +200,23 @@ void AVR_Rifle::ClassifyState(float DeltaTime)
 	{
 		if (MainHand != nullptr && SubHand != nullptr)
 		{
-			SetGripState(ERifleGripState::BothGrip);
+			SetGripState(EWeaponGripState::BothGrip);
 		}
 		else
 		{
 			if (MainHand != nullptr)
 			{
-				SetGripState(ERifleGripState::MainGrip);
+				SetGripState(EWeaponGripState::MainGrip);
 			}
 			else
 			{
-				SetGripState(ERifleGripState::SubGrip);
+				SetGripState(EWeaponGripState::SubGrip);
 			}
 		}
 	}
 	else
 	{
-		SetGripState(ERifleGripState::NoGrip);
+		SetGripState(EWeaponGripState::NoGrip);
 	}
 }
 ///*Reload ฐüทร*/
@@ -239,7 +239,7 @@ void AVR_Rifle::ClassifyState(float DeltaTime)
 //
 //void AVR_Rifle::OneHand_Checking(float DeltaTime)
 //{
-//	if (GripState == ERifleGripState::BothGrip)
+//	if (GripState == EWeaponGripState::BothGrip)
 //	{
 //
 //	}
@@ -442,6 +442,7 @@ AActor* AVR_Rifle::Dropped_Implementation(AActor* OldOwner)
 		}
 	}
 }
+
 //bool AVR_Rifle::ItemIn_Implementation(AActor* Actor, class USceneComponent* Component)
 //{
 //	AVR_RifleMagazine* magazine = Cast<AVR_RifleMagazine>(Actor);
@@ -717,17 +718,17 @@ void AVR_Rifle::TriggerReleased()
 //	}
 //}
 
-void AVR_Rifle::SetGripState(ERifleGripState state)
+void AVR_Rifle::SetGripState(EWeaponGripState state)
 {
 	/*Then 0*/
 	if (GripState != state)
 	{
 		switch (state)
 		{
-		case ERifleGripState::MainGrip:
+		case EWeaponGripState::MainGrip:
 			MainGrip_Enter();
 			break;
-		case ERifleGripState::BothGrip:
+		case EWeaponGripState::BothGrip:
 			BothGrip_Enter();
 			break;
 		}
@@ -737,10 +738,10 @@ void AVR_Rifle::SetGripState(ERifleGripState state)
 	/*Then 1*/
 	switch (state)
 	{
-	case ERifleGripState::MainGrip:
+	case EWeaponGripState::MainGrip:
 		MainGrip_Tick();
 		break;
-	case ERifleGripState::BothGrip:
+	case EWeaponGripState::BothGrip:
 		BothGrip_Tick();
 		break;
 	}

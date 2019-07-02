@@ -6,7 +6,7 @@
 #include "VR_DataTable.generated.h"
 
 UENUM(BlueprintType)
-enum class ERifleGripState: uint8
+enum class EWeaponGripState: uint8
 {
 	NoGrip=0,
 	MainGrip,

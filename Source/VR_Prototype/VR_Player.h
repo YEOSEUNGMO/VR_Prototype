@@ -25,11 +25,27 @@ class VR_PROTOTYPE_API AVR_Player : public APawn
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player", meta = (AllowPrivateAccess = "true"))
 		class AVR_ItemHolder* RifleHolder;
-		//class AVR_RifleHolder* RifleHolder;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player", meta = (AllowPrivateAccess = "true"))
 		class AVR_CrossBowHolder* CrossBowHolder;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player", meta = (AllowPrivateAccess = "true"))
+		class AVR_MotionController* MainHand;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player", meta = (AllowPrivateAccess = "true"))
+		class AVR_MotionController* SubHand;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player", meta = (AllowPrivateAccess = "true"))
+		class USphereComponent* MainHandFixSphere;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player", meta = (AllowPrivateAccess = "true"))
+		bool MainHandFixed;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player", meta = (AllowPrivateAccess = "true"))
+		class USphereComponent* SubHandFixSphere;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player", meta = (AllowPrivateAccess = "true"))
+		bool SubHandFixed;
 public:
 	// Sets default values for this pawn's properties
 	AVR_Player();
@@ -39,6 +55,16 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Player")
 	class UCameraComponent* GetCamera();
 
+	UFUNCTION()
+		void MainHandFixSphereBeginOverlap(class UPrimitiveComponent* OverlappedComp, AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UFUNCTION()
+		void MainHandFixSphereEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	UFUNCTION()
+		void SubHandFixSphereBeginOverlap(class UPrimitiveComponent* OverlappedComp, AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UFUNCTION()
+		void SubHandFixSphereEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	UFUNCTION()
+		void WeaponFix(float DeltaTime);
 	void Trigger_Left(float val);
 	void ReleaseActor_Left();
 
@@ -80,7 +106,7 @@ public:
 
 	TickEventDelegate TickEvent;
 	FDelegateHandle TickEventHandle_SyncCrossBowHolder;
-
+	FDelegateHandle TickEventHandle_WeaponFix;
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
