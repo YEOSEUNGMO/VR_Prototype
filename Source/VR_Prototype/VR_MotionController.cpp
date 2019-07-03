@@ -82,7 +82,7 @@ AVR_MotionController::AVR_MotionController()
 
 	GripSphere->SetupAttachment(HandMesh);
 	GripSphere->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
-	GripSphere->SetSphereRadius(10.0f);
+	GripSphere->SetSphereRadius(8.0f);
 	GripSphere->SetCollisionProfileName(TEXT("OverlapAllDynamic"));
 	GripSphere->SetGenerateOverlapEvents(true);
 	GripSphere->OnComponentBeginOverlap.AddDynamic(this, &AVR_MotionController::OnComponentBeginOverlap);

@@ -310,6 +310,10 @@ void AVR_Player::MainHandFixSphereBeginOverlap(UPrimitiveComponent* OverlappedCo
 		{
 			MainHandFixed = true;
 		}
+		else
+		{
+			SubHandFixed = false;
+		}
 	}
 }
 
@@ -317,8 +321,8 @@ void AVR_Player::MainHandFixSphereEndOverlap(UPrimitiveComponent* OverlappedComp
 {
 	if (OtherActor == RightController || OtherActor == LeftController)
 	{
+		GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Yellow, TEXT("MainOut!"), true, FVector2D(10.0f, 10.0f));
 		MainHandFixed = false;
-		MainHand = nullptr;
 	}
 }
 
@@ -331,6 +335,10 @@ void AVR_Player::SubHandFixSphereBeginOverlap(UPrimitiveComponent* OverlappedCom
 		{
 			SubHandFixed = true;
 		}
+		else
+		{
+			SubHandFixed = false;
+		}
 	}
 }
 
@@ -338,8 +346,8 @@ void AVR_Player::SubHandFixSphereEndOverlap(UPrimitiveComponent* OverlappedComp,
 {
 	if (OtherActor == RightController || OtherActor == LeftController)
 	{
+		GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Yellow, TEXT("SubOut!"), true, FVector2D(10.0f, 10.0f));
 		SubHandFixed = false;
-		SubHand = nullptr;
 	}
 }
 
@@ -351,17 +359,21 @@ void AVR_Player::WeaponFix(float DeltaTime)
 	{
 		if (MainHandFixed && SubHandFixed && MainHand->GetCatchedComp() != nullptr && SubHand->GetCatchedComp() != nullptr)
 		{
-			GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Yellow, TEXT("@@@@@@@"), true, FVector2D(10.0f, 10.0f));
+			//GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Yellow, TEXT("@@@@@@@"), true, FVector2D(10.0f, 10.0f));
 			MainHand->GetHandMesh()->AttachToComponent(MainHandFixSphere, AttachRules);
-			SubHand->GetHandMesh()->AttachToComponent(SubHandFixSphere, AttachRules);
+			//SubHand->GetHandMesh()->AttachToComponent(SubHandFixSphere, AttachRules);
+			MainHand->GetHandMesh()->SetRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
 		}
 
 		else
 		{
+			GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Red, TEXT("@@@@@@@"), true, FVector2D(10.0f, 10.0f));
 			MainHand->GetHandMesh()->DetachFromComponent(DetachRules);
 			MainHand->GetHandMesh()->AttachToComponent(MainHand->GetRotateDummy(), AttachRules);
-			SubHand->GetHandMesh()->DetachFromComponent(DetachRules);
-			SubHand->GetHandMesh()->AttachToComponent(SubHand->GetRotateDummy(), AttachRules);
+			//SubHand->GetHandMesh()->DetachFromComponent(DetachRules);
+			//SubHand->GetHandMesh()->AttachToComponent(SubHand->GetRotateDummy(), AttachRules);
+			MainHand = nullptr;
+			SubHand = nullptr;
 		}
 	}
 }

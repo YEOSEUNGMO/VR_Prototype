@@ -547,7 +547,7 @@ USceneComponent* AVR_Rifle::Catched_Implementation(USceneComponent* ItemComponen
 
 				/*Then0*/
 				SubHand->GetHandMesh()->AttachToComponent(RifleMesh, AttachRules, TEXT("SubHandposition"));
-
+				//SubHandBox->AttachToComponent(SubHand->GetHandMesh(), AttachRules);
 				/*Then1*/
 				UVR_HandAnimInstance* HandAnimation = Cast<UVR_HandAnimInstance>(SubHand->GetHandMesh()->GetAnimInstance());
 				HandAnimation->setRifleSubGripped(true);
