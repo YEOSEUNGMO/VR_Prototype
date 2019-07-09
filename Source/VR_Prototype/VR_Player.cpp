@@ -7,6 +7,7 @@
 #include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Components/WidgetComponent.h"
 #include "Engine/Engine.h"
 #include "MotionControllerComponent.h"
 #include "HeadMountedDisplayFunctionLibrary.h"
@@ -14,7 +15,9 @@
 #include "VR_ItemHolder.h"
 #include "VR_RifleHolder.h"
 #include "VR_CrossBowHolder.h"
+#include "VR_RifleOverLoadWidget.h"
 #include "Kismet/KismetMathLibrary.h"
+
 
 // Sets default values
 AVR_Player::AVR_Player()
@@ -27,6 +30,7 @@ AVR_Player::AVR_Player()
 	VRCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	MainHandFixSphere = CreateDefaultSubobject<USphereComponent>(TEXT("MainHandFixedSphere"));
 	SubHandFixSphere = CreateDefaultSubobject<USphereComponent>(TEXT("SubHandFixedSphere"));
+	Overloadwidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("Overloadwidget"));
 
 	RootComponent = RootScene;
 	CameraBase->SetupAttachment(RootComponent);
@@ -37,13 +41,14 @@ AVR_Player::AVR_Player()
 	SubHandFixSphere->SetupAttachment(VRCamera);
 	SubHandFixSphere->OnComponentBeginOverlap.AddDynamic(this, &AVR_Player::SubHandFixSphereBeginOverlap);
 	SubHandFixSphere->OnComponentEndOverlap.AddDynamic(this, &AVR_Player::SubHandFixSphereEndOverlap);
-
+	Overloadwidget->SetupAttachment(VRCamera);
+	
 	DefaultPlayerHeight = 180.0f;
 	bUseControllerRollToRotate = false;
 	CrossBowHolder_HeightPercent = 0.0f;
 	CrossBowHolder_MinHeight = -65.0f;
 	MainHand = nullptr;
-	SubHand = nullptr;
+	SubHand = nullptr;s
 }
 
 // Called when the game starts or when spawned

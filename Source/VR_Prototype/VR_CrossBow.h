@@ -4,10 +4,8 @@
 
 #include "IN_CatchableItem.h"
 #include "IN_ItemOwner.h"
-#include "IN_ButtonUsableItem.h"
 #include "VR_Projectile.h"
 #include "CoreMinimal.h"
-#include "VR_Weapon.h"
 #include "VR_DataTable.h"
 #include "VR_CrossBow.generated.h"
 

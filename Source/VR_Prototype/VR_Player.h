@@ -45,6 +45,9 @@ class VR_PROTOTYPE_API AVR_Player : public APawn
 		class USphereComponent* SubHandFixSphere;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player", meta = (AllowPrivateAccess = "true"))
+		class UWidgetComponent* Overloadwidget;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player", meta = (AllowPrivateAccess = "true"))
 		bool SubHandFixed;
 public:
 	// Sets default values for this pawn's properties
